@@ -6,22 +6,32 @@ import graph_modification as gm
 import random as rd
 
 # Macros like variables
-NUM_PEERS = 5
+NUM_PEERS = 3
 PROBA = 0.3 # probability of having an edge between any 2 neighbours
-THRESHOLD = 0.1
+THRESHOLD = 0.001
+ALPHA = 0.3 # weight given to self opinion
 
 # Initialize an erdos renyi graph
-initial_graph = nx.erdos_renyi_graph(NUM_PEERS,PROBA,)
+initial_graph = nx.erdos_renyi_graph(NUM_PEERS,PROBA)
 # Adding the property of having multiple edges between nodes
 G = nx.MultiGraph(initial_graph)
 # Assign normal peers with type and opinion
 gm.assign_normal(G)
-# copying an instance of the graph
-G_copy = nx.MultiGraph(G)
+# maximum difference variable to indicate the change in opinion after local update
+max_diff = 1
+li = list(G.nodes_iter(data=True))
+print li
+# Loop to call Local update function until max difference is less than the threshold 
+while (max_diff > THRESHOLD):
+	# copying an instance of the graph
+	G_copy = nx.MultiGraph(G)
+	gm.local_update(G,ALPHA)
+	max_diff = 0
+
 
 
 
 li = list(G.nodes_iter(data=True))
 print li
-nx.draw(G)
+nx.draw(G, with_labels = True)
 plt.show()
