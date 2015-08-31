@@ -9,11 +9,11 @@ import random as rd
 # @param G graph containing the nodes to be edited
 # 
 def assign_normal(G):
-	i = 0
-	# Loop all nodes to assign the attributes
-	for n in G.nodes_iter():
-		G.node[i]['type'] = 'normal'
+	# stores the keys of all nodes in a list
+	l = list(G.nodes_iter())
+	# Loop all nodes in the list to assign the attributes
+	for n in l:
+		G.node[n]['type'] = 'normal'
 		# The initial opinion is given as a random number between 0 and 1
-		G.node[i]['opinion']=rd.betavariate(1,1)
-		i=i+1
+		G.node[n]['opinion']=rd.betavariate(1,1)
 	return;
