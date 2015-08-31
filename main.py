@@ -21,13 +21,17 @@ gm.assign_normal(G)
 max_diff = 1
 li = list(G.nodes_iter(data=True))
 print li
-# Loop to call Local update function until max difference is less than the threshold 
+# Loop to call Local update function until max difference is less than the threshold
+# @var num_loops nuber of loops needed until conversion
+num_loops = 0
 while (max_diff > THRESHOLD):
 	# copying an instance of the graph
 	G_copy = nx.MultiGraph(G)
 	gm.local_update(G,ALPHA)
-	max_diff = 0
-
+	max_diff = gm.max_opinion_difference(G, G_copy)
+	num_loops += 1
+print 'The maximum difference = ', max_diff
+print 'number of loops until conversion = ', num_loops
 
 
 

@@ -3,6 +3,7 @@
 # Adding nodes, edges, attributes...
 import networkx as nx
 import random as rd
+import operator as op
 
 ##
 # assign type and opinion attributes to all nodes of the graph as normal peers
@@ -43,3 +44,31 @@ def local_update(G,alpha):
 				G.node[n]['opinion'] = alpha*G_copy.node[n]['opinion'] + ((1-alpha)/G_copy.degree(n))*neighbors_opinion
 
 	return;
+
+
+##
+# Calculate the maximum absolute change in opinion for all nodes between two conceutive iterations
+# @param G_t current updated graph
+# @param G_t_1 graph of previous iteration
+#
+def max_opinion_difference(G_t, G_t_1):
+	# store the opinion of nodes in both graphs in two lists
+	# store the keys of all nodes in a list
+	l_tmp = list(G_t.nodes_iter())
+	# use stored keys to access both graphs
+	# list of opinions for both graphs initialized to be empty
+	l_t = []
+	l_t_1 = []
+	# for each loop the opinion is added to each of the two lists
+	for n in l_tmp:
+		l_t += [ G_t.node[n]['opinion'] ]
+		l_t_1 += [ G_t_1.node[n]['opinion'] ]
+	#subtract opinions and store the differnce in list
+	l_diff = list(map(op.sub, l_t, l_t_1))
+	# change all values in l_diff list to absolute ones to avoid negative numbers
+	i = 0
+	for n in l_diff:
+		l_diff[i] = abs(n)
+		i += 1
+	# return the maximum value in l_difference 
+	return max(l_diff);
