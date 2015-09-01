@@ -24,12 +24,12 @@ gm.assign_normal(G)
 A = np.zeros(shape=(NUM_PEERS,NUM_PEERS))
 A = cp.mat_A(G,ALPHA)
 
-# Calculate vector R
-R = np.zeros(shape=(NUM_PEERS,1))
-R = cp.vec_R(G)
+# Calculate vector h
+h = np.zeros(shape=(NUM_PEERS,1))
+h = cp.vec_h(G, ALPHA)
 
 print A
-print R
+print h
 
 # maximum difference variable to indicate the change in opinion after local update
 max_diff = 1
