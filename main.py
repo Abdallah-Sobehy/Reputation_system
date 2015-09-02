@@ -7,9 +7,11 @@ import graph_modification as gm
 import random as rd
 import numpy as np
 import computation as cp
+#import pydot
+#import graphviz
 # Macros like variables
-NUM_PEERS = 3
-PROBA = 0.4 # probability of having an edge between any 2 neighbours
+NUM_PEERS = 30
+PROBA = 0.1 # probability of having an edge between any 2 neighbours
 THRESHOLD = 0.001
 ALPHA = 0.3 # weight given to self opinion
 
@@ -20,17 +22,10 @@ G = nx.MultiGraph(initial_graph)
 # Assign normal peers with type and opinion
 gm.assign_normal(G)
 
-# Calculate matrix A
-A = np.zeros(shape=(NUM_PEERS,NUM_PEERS))
-A = cp.mat_A(G,ALPHA)
+# Calculate final opinion vector by equation
+print cp.R_inf(G,ALPHA)[0:3]
 
-# Calculate vector h
-h = np.zeros(shape=(NUM_PEERS,1))
-h = cp.vec_h(G, ALPHA)
-
-print A
-print h
-
+# Calculate final opinion vector by loops
 # maximum difference variable to indicate the change in opinion after local update
 max_diff = 1
 # Loop to call Local update function until max difference is less than the threshold
@@ -46,9 +41,9 @@ print 'The maximum difference = ', max_diff
 print 'number of loops until conversion = ', num_loops
 
 
-
 li = list(G.nodes_iter(data=True))
-#print '\n'.join(map(str, li))
+print '\n'.join(map(str, li[0:3]))
 #print li
-nx.draw(G, with_labels = True)
+# node_color can be a list of letters to assign color to each node
+nx.draw(G,node_color = 'b', with_labels = True)
 plt.show()

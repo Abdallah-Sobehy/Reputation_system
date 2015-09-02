@@ -30,14 +30,30 @@ def mat_A(G, alpha):
 ##
 # creates the h vector that contains the opinions of all nodes in the graph multiplied by alpha
 # R = (I - A[normal])^-1 ( h + A[forceful] * R[F])
-# @param Graph of nodes to retrieve the opinions from
+# @param G Graph of nodes to retrieve the opinions from
+# @param alpha wwight given to self opinion
 #
 def vec_h(G, alpha):
 	n = nx.number_of_nodes(G)
-	# initialize vector R to zeros
+	# initialize vector h to zeros
 	h = np.zeros(shape=(n,1))
 	#iterate all nodes in the graph
 	for i in range(0,n):
 		h[i] = G.node[i]['opinion']
 	h = h*alpha
 	return h;
+
+##
+# Calculates R (inf) using the eq R = (I - A[normal])^-1 ( h + A[forceful] * R[F])
+# @param G graph under test
+# @param alpha wight given to self opinion
+#
+def R_inf(G,alpha):
+	n = nx.number_of_nodes(G)
+	A = mat_A(G, alpha)
+	h = vec_h(G,alpha)
+	# Identity matrix to be used in the equation
+	I = np.identity(n)
+
+	R = (linalg.inv(I-A)).dot(h)
+	return R;
