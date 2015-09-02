@@ -75,28 +75,57 @@ def max_opinion_difference(G_t, G_t_1):
 	return max(l_diff);
 
 ##
-# Adding a forceful peer with one of the 4 strategies
+# Adding 2 forceful peers with one of the 4 strategies each
 # Strategies: Random, Degree, 1/Degree, Degree ^ 2
 # @param G graph whch the forceful nodes is to be added to
-# @param strategy strategy by which the peer will choose its nodes
-# @param budget the number of edges the peer can have
+# @param strategy1 strategy by first forceful peer by which it will choose its nodes
+# @param budget1 the number of edges the first forceful peer can have
+# @param strategy2 strategy by second forceful peer by which it will choose its nodes
+# @param budget2 the number of edges the second forceful peer can have
 #
-def add_forceful(G, strategy, budget):
+def add_forceful(G, strategy1, budget1, strategy2, budget2):
 	n = nx.number_of_nodes(G)
-	# Selection of neighbors depeding on chosen strategy
-	if strategy == 'random':
+	# Selection of neighbors depeding on chosen strategy for peer 1
+	if strategy1 == 'random':
 		# Create a list of 'budget' random numbers [0, NUM_PEERS]
-		f_neighbors = np.random.random_integers(0, n - 1, budget)
-		print f_neighbors
-	# add the forceful peer to the graph
-	G.add_node(n,type = 'f_' + strategy, opinion = 1)
+		f1_neighbors = np.random.random_integers(0, n - 1, budget1)
+
+	# Selection of the neighbors depending on the strategy for peer 2
+	if strategy2 == 'random':
+		# Create a list of 'budget1' random numbers [0, NUM_PEERS]
+		f2_neighbors = np.random.random_integers(0, n - 1, budget2)	
+
+	# add the forceful peers to the graph
+	G.add_node(n,type = 'f_' + strategy1, opinion = 1)
+	G.add_node(n+1,type = 'f_' + strategy2, opinion = -1)
 	# iterate the array of neighbors and add an edge
-	for i in f_neighbors:
+	for i in f1_neighbors:
 		G.add_edge(n, i)
+	for i in f2_neighbors:
+		G.add_edge(n+1,i)
+	print f1_neighbors, f2_neighbors
 	return;
 
 ##
 # colors graph to distinguish between dofferent entities
 #
-#def color_graph(G):
-#	for n in G
+def color_graph(G):
+	n = nx.number_of_nodes(G)
+	color_map = []
+	for i in G:
+		if G.node[i]['opinion'] == 1:
+			color_map += ['navy']
+		elif G.node[i]['opinion'] == -1:
+			color_map += ['darkgreen']
+		# if neighbor of -1 forceful peer
+		elif n-1 in G.neighbors(i) and n-2 not in G.neighbors(i):
+			color_map += ['limegreen']
+		# if neighbor of +1 forceful peer
+		elif n-2 in G.neighbors(i) and n-1 not in G.neighbors(i):
+			color_map +=['royalblue']
+		# if neighbor of bothe forceful peers
+		elif n-1 in G.neighbors(i) and n-2 in G.neighbors(i):
+			color_map +=['black']
+		else: 
+			color_map +=['whitesmoke']
+	return color_map;
