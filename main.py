@@ -10,10 +10,12 @@ import computation as cp
 #import pydot
 #import graphviz
 # Macros like variables
-NUM_PEERS = 30
+NUM_PEERS = 5
 PROBA = 0.1 # probability of having an edge between any 2 neighbours
 THRESHOLD = 0.001
 ALPHA = 0.3 # weight given to self opinion
+STRATEGY1 = 'random' # strategy chosen by first forceful peer
+BUDGET1 = 3
 
 # Initialize an erdos renyi graph
 initial_graph = nx.erdos_renyi_graph(NUM_PEERS,PROBA)
@@ -40,10 +42,13 @@ while (max_diff > THRESHOLD):
 print 'The maximum difference = ', max_diff
 print 'number of loops until conversion = ', num_loops
 
+# Add forceful peer with random strategy
+gm.add_forceful(G, STRATEGY1, BUDGET1)
+
 
 li = list(G.nodes_iter(data=True))
 print '\n'.join(map(str, li[0:3]))
-#print li
-# node_color can be a list of letters to assign color to each node
-nx.draw(G,node_color = 'b', with_labels = True)
+
+#gm.color_graph(G)
+nx.draw(G,node_color = 'goldenrod', edge_color = 'm', with_labels = True)
 plt.show()

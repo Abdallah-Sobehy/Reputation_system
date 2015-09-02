@@ -3,6 +3,7 @@
 # Adding nodes, edges, attributes...
 import networkx as nx
 import random as rd
+import numpy as np
 import operator as op
 
 ##
@@ -72,3 +73,30 @@ def max_opinion_difference(G_t, G_t_1):
 		i += 1
 	# return the maximum value in l_difference 
 	return max(l_diff);
+
+##
+# Adding a forceful peer with one of the 4 strategies
+# Strategies: Random, Degree, 1/Degree, Degree ^ 2
+# @param G graph whch the forceful nodes is to be added to
+# @param strategy strategy by which the peer will choose its nodes
+# @param budget the number of edges the peer can have
+#
+def add_forceful(G, strategy, budget):
+	n = nx.number_of_nodes(G)
+	# Selection of neighbors depeding on chosen strategy
+	if strategy == 'random':
+		# Create a list of 'budget' random numbers [0, NUM_PEERS]
+		f_neighbors = np.random.random_integers(0, n - 1, budget)
+		print f_neighbors
+	# add the forceful peer to the graph
+	G.add_node(n,type = 'f_' + strategy, opinion = 1)
+	# iterate the array of neighbors and add an edge
+	for i in f_neighbors:
+		G.add_edge(n, i)
+	return;
+
+##
+# colors graph to distinguish between dofferent entities
+#
+#def color_graph(G):
+#	for n in G
