@@ -1,7 +1,9 @@
+from __future__ import division
 import unittest as ut
 import graph_modification as gm
 import networkx as nx
 import numpy as np
+
 
 class graphm_test(ut.TestCase):
 	# Setting up fixture
@@ -57,5 +59,45 @@ class graphm_test(ut.TestCase):
 		f_neighbors_actual =  gm.strategy_D(self.G, budget)
 		np.testing.assert_array_almost_equal(f_neighbors_actual, f_neighbors_exp,6,'error in strategy D.')
 
+	# Asserting strategy D^2 function
+	def test_strategy_D2(self):
+		np.random.seed(1)
+		budget = 3
+		# list of neighbors expected to be chosen by the forceful peer
+		f_neighbors_exp = []
+		# list of random numbers between 0 and 1 to choose nodes
+		rnd = np.random.random(budget)
+		# comparing the random numbers against limits calculated by hand
+		for i in range(budget):
+			if rnd[i] >= 0 and rnd[i] < 1/6:
+				f_neighbors_exp += [0]
+			elif rnd[i] >= 1/6 and rnd[i] < 5/6:
+				f_neighbors_exp += [1]
+			elif rnd[i] >= 5/6 and rnd[i] < 1:
+				f_neighbors_exp += [2]
+		# reseeding
+		np.random.seed(1)
+		f_neighbors_actual =  gm.strategy_D2(self.G, budget)
+		np.testing.assert_array_almost_equal(f_neighbors_actual, f_neighbors_exp,6,'error in strategy D.')
 
+	#Asserting strategy 1/D function
+	def test_strategy_1_D(self):
+		np.random.seed(1)
+		budget = 3
+		# list of neighbors expected to be chosen by the forceful peer
+		f_neighbors_exp = []
+		# list of random numbers between 0 and 1 to choose nodes
+		rnd = np.random.random(budget)
+		# comparing the random numbers against limits calculated by hand
+		for i in range(budget):
+			if rnd[i] >= 0 and rnd[i] < 2/5:
+				f_neighbors_exp += [0]
+			elif rnd[i] >= 2/5 and rnd[i] < 3/5:
+				f_neighbors_exp += [1]
+			elif rnd[i] >= 3/5 and rnd[i] < 1:
+				f_neighbors_exp += [2]
+		# reseeding
+		np.random.seed(1)
+		f_neighbors_actual = gm.strategy_1_D(self.G,budget)
+		np.testing.assert_array_almost_equal(f_neighbors_actual,f_neighbors_exp,6,'error in strategy 1/D')
 ut.main()

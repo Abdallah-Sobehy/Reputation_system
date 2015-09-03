@@ -7,7 +7,6 @@ import graph_modification as gm
 import random as rd
 import numpy as np
 import computation as cp
-import random
 import time;
 #import pydot
 #import graphviz
@@ -26,7 +25,7 @@ BUDGET2 = 20 # number of edges allowed for second forceful peer
 # seed the random generator
 print 'seed used:', SEED
 np.random.seed(SEED)
-random.seed(SEED)
+rd.seed(SEED)
 # Initialize an erdos renyi graph
 initial_graph = nx.erdos_renyi_graph(NUM_PEERS,PROBA)
 # Adding the property of having multiple edges between nodes

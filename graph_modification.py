@@ -121,11 +121,65 @@ def strategy_D(G, budget):
 	# the probabaility of choosing a certain node depending on its degree
 	limits = [0.0]
 	num_edges = G.number_of_edges()
-	# list to contain keys of neighbors t be attache to the forceful peer
-	f_neighbors = []
 	# iterate nodes to calculate limits depending on degree
 	for i in G:
 		limits += [G.degree(i)/(2*num_edges) + limits[i]]
+	return select_neighbors(limits, budget)
+
+##
+# returns a list of neighbors for a forceful peer with D^2 strategy
+# @param G graph with nodes from which the forceful peer will choose
+# @param budget number of neighbors the forceful peer will choose
+#
+def strategy_D2(G, budget):
+	# limits is a list that stores floats between 0 and one which defines
+	# the probabaility of choosing a certain node depending on its degree
+	limits = [0.0]
+	# store the degree of all nodes in a list
+	degrees = G.degree()
+	tmp = []
+	for i in range(len(degrees)):
+		tmp += [degrees[i]]
+	# squaring all degrees in the list
+	degrees2 = [x**2 for x in tmp]	
+	# summation of (degrees^2) for all nodes
+	sum_degs2 = sum(degrees2)
+	# iterate nodes to calculate limits depending on degree
+	for i in G:
+		limits += [(G.degree(i)** 2)/sum_degs2 + limits[i]]
+	return select_neighbors(limits, budget)
+
+##
+# returns a list of neighbors for a forceful peer with 1/D strategy
+# @param G graph with nodes from which the forceful peer will choose
+# @param budget number of neighbors the forceful peer will choose
+#
+def strategy_1_D(G, budget):
+	# limits is a list that stores floats between 0 and one which defines
+	# the probabaility of choosing a certain node depending on its degree
+	limits = [0.0]
+	# store the degree of all nodes in a list
+	degrees = G.degree()
+	tmp = []
+	for i in range(len(degrees)):
+		tmp += [degrees[i]] 
+	# computes the reciprocal of all degrees
+	degrees_recp = []
+	for i in range(len(tmp)):
+		degrees_recp += [1/tmp[i]]
+	# summation of all reciprocals
+	sum_degs_recp = sum(degrees_recp)
+	for i in G:
+		limits += [((1/G.degree(i))/sum_degs_recp) + limits[i]]
+	return select_neighbors(limits, budget)
+
+##
+# returns of selected nodes to be neighbors of a forceful peer
+# depending on the given limits list
+#
+def select_neighbors(limits, budget):
+	# list to contain keys of neighbors t be attached to the forceful peer
+	f_neighbors = []
 	# iterate budget times to add neighbors to the list
 	for i in range(budget):
 		rnd = np.random.random()
@@ -134,6 +188,8 @@ def strategy_D(G, budget):
 			if rnd >= limits[j] and rnd < limits[j+1]:
 				f_neighbors += [j]
 	return f_neighbors;
+
+
 ##
 # colors graph to distinguish between dofferent entities
 #
