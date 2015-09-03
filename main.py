@@ -55,5 +55,5 @@ Blues = plt.get_cmap('Blues')
 
 
 color_map = gm.color_graph(G)
-nx.draw(G,node_color = color_map, edge_color = 'black', with_labels = True)
+nx.draw(G,node_size = 250,node_color = color_map, edge_color = 'black', with_labels = True)
 plt.show()

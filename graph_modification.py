@@ -113,19 +113,21 @@ def color_graph(G):
 	n = nx.number_of_nodes(G)
 	color_map = []
 	for i in G:
+		# color for forceful peer +1
 		if G.node[i]['opinion'] == 1:
-			color_map += ['navy']
+			color_map += ['blue']
+		# color for forceful peer -1
 		elif G.node[i]['opinion'] == -1:
-			color_map += ['darkgreen']
+			color_map += ['crimson']
 		# if neighbor of -1 forceful peer
 		elif n-1 in G.neighbors(i) and n-2 not in G.neighbors(i):
-			color_map += ['limegreen']
+			color_map += ['lightsalmon']
 		# if neighbor of +1 forceful peer
 		elif n-2 in G.neighbors(i) and n-1 not in G.neighbors(i):
-			color_map +=['royalblue']
-		# if neighbor of bothe forceful peers
+			color_map +=['lightskyblue']
+		# if neighbor of both forceful peers
 		elif n-1 in G.neighbors(i) and n-2 in G.neighbors(i):
 			color_map +=['black']
-		else: 
-			color_map +=['whitesmoke']
+		else: # If neighbor of none of the forceful peers
+			color_map +=['grey']
 	return color_map;
