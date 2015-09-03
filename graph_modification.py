@@ -1,6 +1,7 @@
 ## @package graph_modification
 # This module contains functions to edit graph contents:
 # Adding nodes, edges, attributes...
+from __future__ import division # to allow integer division to produce a floating point
 import networkx as nx
 import random as rd
 import numpy as np
@@ -89,12 +90,17 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 	if strategy1 == 'random':
 		# Create a list of 'budget' random numbers [0, NUM_PEERS]
 		f1_neighbors = np.random.random_integers(0, n - 1, budget1)
+	elif strategy1 == 'D':
+		# call strategy_D function to calculate neighbors of foeceful 1
+		f1_neighbors = strategy_D(G,budget1)
 
 	# Selection of the neighbors depending on the strategy for peer 2
 	if strategy2 == 'random':
 		# Create a list of 'budget1' random numbers [0, NUM_PEERS]
 		f2_neighbors = np.random.random_integers(0, n - 1, budget2)	
-
+	elif strategy2 == 'D':
+		# call strategy_D function to calculate neighbors of foeceful 2
+		f2_neighbors = strategy_D(G,budget2)
 	# add the forceful peers to the graph
 	G.add_node(n,type = 'f_' + strategy1, opinion = 1)
 	G.add_node(n+1,type = 'f_' + strategy2, opinion = -1)
@@ -103,9 +109,31 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 		G.add_edge(n, i)
 	for i in f2_neighbors:
 		G.add_edge(n+1,i)
-	print f1_neighbors, f2_neighbors
 	return;
 
+##
+# returns a list of neighbors for a forceful peer with D strategy
+# @param G graph with nodes from which the forceful peer will choose
+# @param budget number of neighbors the forceful peer will choose
+#
+def strategy_D(G, budget):
+	# limits is a list that stores floats between 0 and one which defines
+	# the probabaility of choosing a certain node depending on its degree
+	limits = [0.0]
+	num_edges = G.number_of_edges()
+	# list to contain keys of neighbors t be attache to the forceful peer
+	f_neighbors = []
+	# iterate nodes to calculate limits depending on degree
+	for i in G:
+		limits += [G.degree(i)/(2*num_edges) + limits[i]]
+	# iterate budget times to add neighbors to the list
+	for i in range(budget):
+		rnd = np.random.random()
+		# compare the random number to the limits and add node accordingly
+		for j in range(len(limits) - 1):
+			if rnd >= limits[j] and rnd < limits[j+1]:
+				f_neighbors += [j]
+	return f_neighbors;
 ##
 # colors graph to distinguish between dofferent entities
 #
@@ -128,6 +156,10 @@ def color_graph(G):
 		# if neighbor of both forceful peers
 		elif n-1 in G.neighbors(i) and n-2 in G.neighbors(i):
 			color_map +=['black']
-		else: # If neighbor of none of the forceful peers
+		# if not connected to any of the forceful peer
+		elif n-2 not in G.neighbors(i) and n-1 not in G.neighbors(i): # If neighbor of none of the forceful peers
 			color_map +=['grey']
+		# Just a test if a category of nodes has not been covered
+		else : color_map += ['limegreen']
+
 	return color_map;
