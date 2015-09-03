@@ -13,14 +13,14 @@ import time;
 # Macros like variables
 
 SEED = int(time.time())
-NUM_PEERS = 50
-PROBA = 0.1 # probability of having an edge between any 2 neighbours
+NUM_PEERS = 100
+PROBA = 0.02 # probability of having an edge between any 2 neighbours
 THRESHOLD = 0.001
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = 'D' # strategy chosen by first forceful peer
-BUDGET1 = 20 # number of edges allowed for first forceful peer
+BUDGET1 = 80 # number of edges allowed for first forceful peer
 STRATEGY2 = 'random' # strategy chosen by second forceful peer
-BUDGET2 = 20 # number of edges allowed for second forceful peer
+BUDGET2 = 80 # number of edges allowed for second forceful peer
 
 # seed the random generator
 print 'seed used:', SEED
@@ -33,8 +33,12 @@ G = nx.MultiGraph(initial_graph)
 # Assign normal peers with type and opinion
 gm.assign_normal(G)
 
-# Calculate final opinion vector by equation
-print cp.R_inf(G,ALPHA)[0:3]
+# Add 2 forceful peers with chosen strategy
+gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
+
+# Calculate final opinion vector by equation, considering the presence of 
+# 2 forceful peers in the last 2 indices of the graph
+print cp.R_inf(G,ALPHA)[0:9]
 
 # Calculate final opinion vector by loops
 # maximum difference variable to indicate the change in opinion after local update
@@ -51,12 +55,9 @@ while (max_diff > THRESHOLD):
 print 'The maximum difference = ', max_diff
 print 'number of loops until conversion = ', num_loops
 
-# Add 2 forceful peers with chosen strategy
-gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
-#print G.neighbors(NUM_PEERS)
 
 li = list(G.nodes_iter(data=True))
-print '\n'.join(map(str, li[0:3]))
+print '\n'.join(map(str, li[0:9]))
 
 Blues = plt.get_cmap('Blues')
 

@@ -17,8 +17,11 @@ def assign_normal(G):
 	# Loop all nodes in the list to assign the attributes
 	for n in l:
 		G.node[n]['type'] = 'normal'
-		# The initial opinion is given as a random number between 0 and 1
-		G.node[n]['opinion']=rd.betavariate(1,1)#### between -1 and 1, and start in a middle value (0)
+		# The initial opinion is given as neutral = 0
+		G.node[n]['opinion']= 0
+		# Storing the value of initial opinion 
+		G.node[n]['initial_opinion'] = 0
+
 	return;
 
 ##
@@ -43,7 +46,7 @@ def local_update(G,alpha):
 				for o in list_neighbors:
 					neighbors_opinion += G_copy.node[o]['opinion']
 				# Local update equation
-				G.node[n]['opinion'] = alpha*G_copy.node[n]['opinion'] + ((1-alpha)/G_copy.degree(n))*neighbors_opinion
+				G.node[n]['opinion'] = alpha*G.node[n]['initial_opinion'] + ((1-alpha)/G_copy.degree(n))*neighbors_opinion
 
 	return;
 
@@ -101,7 +104,8 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 	elif strategy2 == 'D':
 		# call strategy_D function to calculate neighbors of foeceful 2
 		f2_neighbors = strategy_D(G,budget2)
-	# add the forceful peers to the graph
+	# add the forceful peers to the graph, the first is with opinion 1 
+	# The second is with opinion -1
 	G.add_node(n,type = 'f_' + strategy1, opinion = 1)
 	G.add_node(n+1,type = 'f_' + strategy2, opinion = -1)
 	# iterate the array of neighbors and add an edge
