@@ -37,6 +37,7 @@ def local_update(G,alpha):
 	l = list(G_copy.nodes_iter())
 	# Loop all nodes in the list to check for its type
 	for n in l:
+		# Update is only done to normal peers.
 		if G_copy.node[n]['type'] == 'normal':
 			#Iterate and sum all opinions of neighbors
 			list_neighbors = list(nx.all_neighbors(G_copy,n))
@@ -44,7 +45,9 @@ def local_update(G,alpha):
 			if (len(list_neighbors) > 0):
 				neighbors_opinion = 0
 				for o in list_neighbors:
-					neighbors_opinion += G_copy.node[o]['opinion']
+					num_edges = 1
+					#num_edges = G.number_of_edges(n,o)
+					neighbors_opinion += num_edges*G_copy.node[o]['opinion']
 				# Local update equation
 				G.node[n]['opinion'] = alpha*G.node[n]['initial_opinion'] + ((1-alpha)/G_copy.degree(n))*neighbors_opinion
 

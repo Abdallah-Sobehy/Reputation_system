@@ -12,15 +12,16 @@ import time;
 #import graphviz
 # Macros like variables
 
-SEED = int(time.time())
+SEED = 1441353050
+#SEED = int(time.time())
 NUM_PEERS = 100
-PROBA = 0.02 # probability of having an edge between any 2 neighbours
-THRESHOLD = 0.001
+PROBA = 0.06 # probability of having an edge between any 2 neighbours
+THRESHOLD = 0.00001
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = 'D' # strategy chosen by first forceful peer
-BUDGET1 = 80 # number of edges allowed for first forceful peer
+BUDGET1 = 20 # number of edges allowed for first forceful peer
 STRATEGY2 = 'random' # strategy chosen by second forceful peer
-BUDGET2 = 80 # number of edges allowed for second forceful peer
+BUDGET2 = 20 # number of edges allowed for second forceful peer
 
 # seed the random generator
 print 'seed used:', SEED

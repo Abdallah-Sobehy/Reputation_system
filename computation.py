@@ -26,6 +26,7 @@ def mat_A(G, alpha):
 		# update A[i,j] if j is a neighbor of i
 		for j in range(0,n):
 			if j in l_neighbors:
+				#A[i,j] = ((1-alpha)/deg)*G.number_of_edges(i,j)
 				A[i,j] = (1-alpha)/deg
 	return A;
 
