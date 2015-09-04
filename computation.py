@@ -26,7 +26,6 @@ def mat_A(G, alpha):
 		# update A[i,j] if j is a neighbor of i
 		for j in range(0,n):
 			if j in l_neighbors:
-				#A[i,j] = ((1-alpha)/deg)*G.number_of_edges(i,j)
 				A[i,j] = (1-alpha)/deg
 	return A;
 
@@ -47,9 +46,9 @@ def mat_AF(G, alpha):
 	for i in range(n):
 		# fill for the 2 columns (representing connection to forceful peers)
 		if n in G.neighbors(i):
-			AF[i,0] = (1-alpha)/G.degree(i)
+			AF[i,0] = ((1-alpha)/G.degree(i))*G.number_of_edges(i,n)
 		if n+1 in G.neighbors(i):
-			AF[i,1] = (1-alpha)/G.degree(i)
+			AF[i,1] = ((1-alpha)/G.degree(i))*G.number_of_edges(i,n+1)
 	return AF;
 ##
 # creates the h vector that contains the initial opinions of all nodes in the graph multiplied by alpha

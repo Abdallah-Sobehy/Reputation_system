@@ -45,8 +45,8 @@ def local_update(G,alpha):
 			if (len(list_neighbors) > 0):
 				neighbors_opinion = 0
 				for o in list_neighbors:
-					num_edges = 1
-					#num_edges = G.number_of_edges(n,o)
+					#num_edges = 1
+					num_edges = G.number_of_edges(n,o)
 					neighbors_opinion += num_edges*G_copy.node[o]['opinion']
 				# Local update equation
 				G.node[n]['opinion'] = alpha*G.node[n]['initial_opinion'] + ((1-alpha)/G_copy.degree(n))*neighbors_opinion

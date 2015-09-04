@@ -59,9 +59,12 @@ print 'number of loops until conversion = ', num_loops
 
 li = list(G.nodes_iter(data=True))
 print '\n'.join(map(str, li[0:9]))
-
-Blues = plt.get_cmap('Blues')
-
+# assert equality of R_inf calculated by both equation and iterations
+R_itr = []
+for n in range(NUM_PEERS):
+	R_itr += [[ G.node[n]['opinion']] ]
+# Asserting that R_inf calculated by equation and iteration are equal to 5 decimal places in standard format
+np.testing.assert_array_almost_equal(cp.R_inf(G,ALPHA),R_itr,5,'R_inf is different by equation and iteration')
 
 color_map = gm.color_graph(G)
 nx.draw(G,node_size = 250,node_color = color_map, edge_color = 'black', with_labels = True)
