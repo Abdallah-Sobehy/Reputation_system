@@ -6,6 +6,8 @@ import networkx as nx
 import random as rd
 import numpy as np
 import operator as op
+import sys
+import excp as ex
 
 ##
 # assign type and opinion attributes to all nodes of the graph as normal peers
@@ -92,21 +94,39 @@ def max_opinion_difference(G_t, G_t_1):
 #
 def add_forceful(G, strategy1, budget1, strategy2, budget2):
 	n = nx.number_of_nodes(G)
-	# Selection of neighbors depeding on chosen strategy for peer 1
+	# Selection of neighbors depending on chosen strategy for forceful peer 1
 	if strategy1 == 'random':
 		# Create a list of 'budget' random numbers [0, NUM_PEERS]
 		f1_neighbors = np.random.random_integers(0, n - 1, budget1)
 	elif strategy1 == 'D':
-		# call strategy_D function to calculate neighbors of foeceful 1
+		# call strategy_D function to calculate neighbors of forceful peer 1
 		f1_neighbors = strategy_D(G,budget1)
+	elif strategy1 == 'D^2':
+		# call strategy_D2 function to calculate neighbors for forceful peer 1
+		f1_neighbors = strategy_D2(G, budget1)
+	elif strategy1 == '1/D':
+		# call strategy_1_D function to calculate neighbors for forceful peer 1
+		f1_neighbors = strategy_1_D(G, budget1)
+	else:
+		raise SystemExit('Chosen strategy for first forceful peer [[' + strategy1+ ']] is not applicable\nprogram will exit');
 
 	# Selection of the neighbors depending on the strategy for peer 2
 	if strategy2 == 'random':
 		# Create a list of 'budget1' random numbers [0, NUM_PEERS]
 		f2_neighbors = np.random.random_integers(0, n - 1, budget2)	
 	elif strategy2 == 'D':
-		# call strategy_D function to calculate neighbors of foeceful 2
+		# call strategy_D function to calculate neighbors of forceful 2
 		f2_neighbors = strategy_D(G,budget2)
+	elif strategy2 == 'D^2':
+		# call strategy_D2 function to calculate neighbors of forceful 2
+		f2_neighbors = strategy_D2(G,budget2)
+	elif strategy2 == '1/D':
+		# call strategy_1_D function to calculate neighbors of forceful 2
+		f2_neighbors = strategy_1_D(G,budget2)
+	# an Error statement if the chosen strategy is not applicable
+	else:
+		raise SystemExit('Chosen strategy for second forceful peer [[' + strategy2+ ']] is not applicable\nprogram will exit');
+
 	# add the forceful peers to the graph, the first is with opinion 1 
 	# The second is with opinion -1
 	G.add_node(n,type = 'f_' + strategy1, opinion = 1)
@@ -172,12 +192,19 @@ def strategy_1_D(G, budget):
 		tmp += [degrees[i]] 
 	# computes the reciprocal of all degrees
 	degrees_recp = []
-	for i in range(len(tmp)):
-		degrees_recp += [1/tmp[i]]
+	try:
+		for i in range(len(tmp)):
+			degrees_recp += [1/tmp[i]]
+	except ZeroDivisionError:
+		sys.exit('Division by zero when calculating neighbors for 1/D strategy\ndue to the presence of a node with zero degree')
+
 	# summation of all reciprocals
 	sum_degs_recp = sum(degrees_recp)
 	for i in G:
-		limits += [((1/G.degree(i))/sum_degs_recp) + limits[i]]
+		try:
+			limits += [((1/G.degree(i))/sum_degs_recp) + limits[i]]
+		except ZeroDivisionError:
+			sys.exit('Division by zero when calculating neighbors for 1/D strategy\ndue to the presence of a node with zero degree')
 	return select_neighbors(limits, budget)
 
 ##
@@ -222,7 +249,13 @@ def color_graph(G):
 		# if not connected to any of the forceful peer
 		elif n-2 not in G.neighbors(i) and n-1 not in G.neighbors(i): # If neighbor of none of the forceful peers
 			color_map +=['grey']
-		# Just a test if a category of nodes has not been covered
-		else : color_map += ['limegreen']
+		# a test if a category of nodes has not been covered
+		else :
+			try:
+				color_map += ['limegreen']
+				raise ex.UncategorizedNodeError(i)
+			except ex.UncategorizedNodeError as un:
+				print 'warning a node [',i,'] out of the specifed categories\n will be colored in lime green '
+
 
 	return color_map;

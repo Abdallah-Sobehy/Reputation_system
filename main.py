@@ -7,21 +7,23 @@ import graph_modification as gm
 import random as rd
 import numpy as np
 import computation as cp
-import time;
+import time
+import excp as ex
 #import pydot
 #import graphviz
+
 # Macros like variables
 
-SEED = 1441353050
+SEED = 1441635615
 #SEED = int(time.time())
-NUM_PEERS = 100
-PROBA = 0.06 # probability of having an edge between any 2 neighbours
+NUM_PEERS = 20
+PROBA = 0.08 # probability of having an edge between any 2 neighbours
 THRESHOLD = 0.00001
 ALPHA = 0.3 # weight given to self opinion
-STRATEGY1 = 'D' # strategy chosen by first forceful peer
-BUDGET1 = 20 # number of edges allowed for first forceful peer
+STRATEGY1 = 'D^2' # strategy chosen by first forceful peer
+BUDGET1 = 5 # number of edges allowed for first forceful peer
 STRATEGY2 = 'random' # strategy chosen by second forceful peer
-BUDGET2 = 20 # number of edges allowed for second forceful peer
+BUDGET2 = 5 # number of edges allowed for second forceful peer
 
 # seed the random generator
 print 'seed used:', SEED
@@ -39,7 +41,7 @@ gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
 
 # Calculate final opinion vector by equation, considering the presence of 
 # 2 forceful peers in the last 2 indices of the graph
-print cp.R_inf(G,ALPHA)[0:9]
+R_inf = cp.R_inf(G,ALPHA)
 
 # Calculate final opinion vector by loops
 # maximum difference variable to indicate the change in opinion after local update
@@ -57,15 +59,20 @@ print 'The maximum difference = ', max_diff
 print 'number of loops until conversion = ', num_loops
 
 
-li = list(G.nodes_iter(data=True))
-print '\n'.join(map(str, li[0:9]))
 # assert equality of R_inf calculated by both equation and iterations
+# R_itr contains opinion of nodes due to iterations
 R_itr = []
 for n in range(NUM_PEERS):
 	R_itr += [[ G.node[n]['opinion']] ]
 # Asserting that R_inf calculated by equation and iteration are equal to 5 decimal places in standard format
-np.testing.assert_array_almost_equal(cp.R_inf(G,ALPHA),R_itr,5,'R_inf is different by equation and iteration')
+try:
+	assertion_accuracy =  6
+	np.testing.assert_array_almost_equal(R_inf,R_itr,assertion_accuracy)
+except AssertionError:
+	raise ex.ConvergenceError(assertion_accuracy)
 
+print '\n'.join(map(str, R_itr))
 color_map = gm.color_graph(G)
 nx.draw(G,node_size = 250,node_color = color_map, edge_color = 'black', with_labels = True)
 plt.show()
+#1441633954
