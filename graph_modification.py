@@ -10,6 +10,19 @@ import sys
 import excp as ex
 
 ##
+# Create a network graph, of a given type and characteristic
+# @param num_peersnumber of noral peers in the graph
+# @param proba probability of an edge between any 2 nodes
+#
+def create_graph(num_peers, proba):
+	# Initialize an erdos renyi graph
+	initial_graph = nx.erdos_renyi_graph(num_peers,proba)
+	# Adding the property of having multiple edges between nodes
+	G = nx.MultiGraph(initial_graph)
+	# Assign normal peers with type and opinion
+	assign_normal(G)
+	return G;
+##
 # assign type and opinion attributes to all nodes of the graph as normal peers
 # @param G graph containing the nodes to be edited
 # 
@@ -25,6 +38,35 @@ def assign_normal(G):
 		G.node[n]['initial_opinion'] = 0
 
 	return;
+
+##
+# Calculates the final opinion vector R_inf by iterations using algorithm 15 in Dr. Amira's thesis
+# @param G graph of nodes to update their opinions
+# @param ALPHA weight given to self opinion (between 0 and 1)
+#
+def R_itr(G,ALPHA):
+	# The maximum accepted difference of opinions between two iterations.iterations terminated when reached
+	THRESHOLD = 0.00001
+	# maximum difference variable to indicate the change in opinion after local update
+	max_diff = 1
+	# Loop to call Local update function until max difference is less than the threshold
+	# @var num_loops nuber of loops needed until conversion
+	num_loops = 0
+	while (max_diff > THRESHOLD):
+		# copying an instance of the graph
+		G_copy = nx.MultiGraph(G)
+		local_update(G,ALPHA)
+		max_diff = max_opinion_difference(G, G_copy)
+		num_loops += 1
+	print 'The maximum difference = ', max_diff
+	print 'number of loops until conversion = ', num_loops
+	# R_itr contains opinion of nodes due to iterations
+	R_itr = []
+	for n in range(G.number_of_nodes()-2):
+		R_itr += [[ G.node[n]['opinion']] ]
+	return R_itr;
+
+
 
 ##
 # updates local opinion of a node using it's own opinion and neighbor's
@@ -222,40 +264,3 @@ def select_neighbors(limits, budget):
 			if rnd >= limits[j] and rnd < limits[j+1]:
 				f_neighbors += [j]
 	return f_neighbors;
-
-
-##
-# colors graph to distinguish between dofferent entities
-#
-def color_graph(G):
-	n = nx.number_of_nodes(G)
-	color_map = []
-	for i in G:
-		# color for forceful peer +1
-		if G.node[i]['opinion'] == 1:
-			color_map += ['blue']
-		# color for forceful peer -1
-		elif G.node[i]['opinion'] == -1:
-			color_map += ['crimson']
-		# if neighbor of -1 forceful peer
-		elif n-1 in G.neighbors(i) and n-2 not in G.neighbors(i):
-			color_map += ['lightsalmon']
-		# if neighbor of +1 forceful peer
-		elif n-2 in G.neighbors(i) and n-1 not in G.neighbors(i):
-			color_map +=['lightskyblue']
-		# if neighbor of both forceful peers
-		elif n-1 in G.neighbors(i) and n-2 in G.neighbors(i):
-			color_map +=['black']
-		# if not connected to any of the forceful peer
-		elif n-2 not in G.neighbors(i) and n-1 not in G.neighbors(i): # If neighbor of none of the forceful peers
-			color_map +=['grey']
-		# a test if a category of nodes has not been covered
-		else :
-			try:
-				color_map += ['limegreen']
-				raise ex.UncategorizedNodeError(i)
-			except ex.UncategorizedNodeError as un:
-				print 'warning a node [',i,'] out of the specifed categories\n will be colored in lime green '
-
-
-	return color_map;
