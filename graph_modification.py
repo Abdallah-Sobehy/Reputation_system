@@ -12,11 +12,21 @@ import excp as ex
 ##
 # Create a network graph, of a given type and characteristic
 # @param num_peersnumber of noral peers in the graph
-# @param proba probability of an edge between any 2 nodes
+# @param g_char graph charateristic that depends on the graph type
+# For a random graph: probability of an edge between any 2 nodes
+# For a geometric graph maximum euclidean distance for a edge to exist between 2 nodes
 #
-def create_graph(num_peers, proba):
-	# Initialize an erdos renyi graph
-	initial_graph = nx.erdos_renyi_graph(num_peers,proba)
+def create_graph(g_type,num_peers, g_char):
+	if g_type == 'random':
+		# Initialize an erdos renyi graph with probability g_char
+		initial_graph = nx.erdos_renyi_graph(num_peers,g_char)
+	elif g_type == 'geometric':
+		# Initialize a random geometric graph with radius g_char
+		initial_graph = nx.random_geometric_graph(num_peers,g_char)
+	elif g_type == 'barabasi_albert':
+		# Initialize a barbasi albert graph with g_char starting nodes
+		initial_graph = nx.barabasi_albert_graph(num_peers,g_char)
+	else : raise SystemExit('Chosen graph type ['+str(g_type)+'] is not applicable.\nProgram will terminate')
 	# Adding the property of having multiple edges between nodes
 	G = nx.MultiGraph(initial_graph)
 	# Assign normal peers with type and opinion
