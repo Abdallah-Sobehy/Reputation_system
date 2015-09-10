@@ -15,60 +15,62 @@ import display as d
 #import graphviz
 
 # Macros like variables
-
-#SEED = 1441635615
-SEED = int(time.time())
-NUM_PEERS = 300
-PROBA = 0.04 # probability of having an edge between any 2 neighbours
+start_time = time.time()
+#SEED = 1441804756
+SEED = int(start_time)
+NUM_PEERS = 100
+PROBA = 0.1 # probability of having an edge between any 2 neighbours
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = 'random' # strategy chosen by first forceful peer
-BUDGET1 = 150 # number of edges allowed for first forceful peer
-STRATEGY2 = '1/D' # strategy chosen by second forceful peer
-BUDGET2 = 150 # number of edges allowed for second forceful peer
+BUDGET1 = 50 # number of edges allowed for first forceful peer
+STRATEGY2 = 'D^2' # strategy chosen by second forceful peer
+BUDGET2 = 50 # number of edges allowed for second forceful peer
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
+SIMULATIONS = 500 # Number of repition of a match between 2 strategies
 
 # seed the random generator
-print 'seed used:', SEED ; np.random.seed(SEED)  ;rd.seed(SEED)
-# Initialize an erdos renyi graph
-G = gm.create_graph(NUM_PEERS, PROBA)
-
-# Add 2 forceful peers with chosen strategy
-gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
-
-# Calculate final opinion vector by equation, considering the presence of 
-# 2 forceful peers in the last 2 indices of the graph
-R_inf = cp.R_inf(G,ALPHA)
-
-# Calculate final opinion vector by iterations
-R_itr = gm.R_itr(G,ALPHA)
-
-
-# Calculate the percentage of normal peers that followed either of the forceful peers
-pos_percent = neg_percent = neutral_perc = 0
-for i in range(NUM_PEERS):
-	if G.node[i]['opinion'] < - NEUTRAL_RANGE:
-		neg_percent +=1
-	elif G.node[i]['opinion'] > NEUTRAL_RANGE:
-		pos_percent +=1
-	elif G.node[i]['opinion'] >= - NEUTRAL_RANGE and G.node[i]['opinion'] <= NEUTRAL_RANGE:
-		neutral_perc +=1
-	else:
-		try:
-			raise ex.UncategorizedNodeError(i)
-		except ex.UncategorizedNodeError as un:
-				print 'warning a node [',i,'] out of the specifed categories according to opinion'
-pos_percent /= NUM_PEERS
-neg_percent /= NUM_PEERS
-neutral_perc /= NUM_PEERS
-print 'Positive nodes: %f\nNegative nodes: %f\nNeutral Nodes: %f' %(pos_percent,neg_percent,neutral_perc)
-
-
-# Asserting that R_inf calculated by equation and iteration are equal to decimal places
-try:
-	np.testing.assert_array_almost_equal(R_inf,R_itr,4)
-except AssertionError:
-	sys.exit('ConvergenceError: convergence of R_inf is not correct to 4 decimal places\nProgram will terminate')
-
+np.random.seed(SEED)  ;rd.seed(SEED)
+# arrays to store the percentages of positive, negative, neutral nodes
+pos_percent = np.zeros(SIMULATIONS)
+neg_percent = np.zeros(SIMULATIONS)
+neutral_percent = np.zeros(SIMULATIONS)
+for i in range(SIMULATIONS):
+	# Initialize an erdos renyi graph
+	G = gm.create_graph(NUM_PEERS, PROBA)
+	# Add 2 forceful peers with chosen strategy
+	try:
+		gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
+	except ZeroDivisionError:
+		print 'ZeroDivisionError: when calculating neighbors for 1/D strategy\nSimulation match ignored'
+		# Consider the results of the previous match the igore the rest of the loop
+		if i != 0:
+			pos_percent[i] = tmp[0]
+			neg_percent[i] = tmp[1]
+			neutral_percent[i] = tmp[2]
+		else : sys.exit('Can not use previous match result (first iteration), program will terminate')
+		continue
+	# Calculate final opinion vector by equation, considering the presence of 
+	# 2 forceful peers in the last 2 indices of the graph
+#	R_inf = cp.R_inf(G,ALPHA)
+	# Calculate final opinion vector by iterations
+	R_itr = gm.R_itr(G,ALPHA)
+	# Calculate the percentage of normal peers that followed either of the forceful peers
+	tmp = cp.percentages(G,NEUTRAL_RANGE)
+	#store each percent in its array
+	pos_percent[i] = tmp[0]
+	neg_percent[i] = tmp[1]
+	neutral_percent[i] = tmp[2]
+	# Print result each 100 simulation match
+	if i%100 == 0:
+		print '%f, %f,%f'%(np.sum(pos_percent)/(i+1), np.sum(neg_percent)/(i+1), np.sum(neutral_percent)/(i+1))
+	# Asserting that R_inf calculated by equation and iteration are equal to decimal places
+#	try:
+#		np.testing.assert_array_almost_equal(R_inf,R_itr,4)
+#	except AssertionError:
+#		sys.exit('ConvergenceError: convergence of R_inf is not correct to 4 decimal places\nProgram will terminate')
+print 'seed used:', SEED 
+print 'After %d simulations\n%s strategy nodes: %f\n%s strategy nodes: %f\nNeutral Nodes: %f' %(SIMULATIONS,STRATEGY1,np.mean(pos_percent),STRATEGY2,np.mean(neg_percent),np.mean(neutral_percent))
+print 'Time elapsed %f' % (time.time() - start_time)
 #print '\n'.join(map(str, R_itr))
 # Display the graph categorizing nodes by category and by opinion based on the neutral range
-#d.display_graph(G,NEUTRAL_RANGE)
+d.display_graph(G,NEUTRAL_RANGE)

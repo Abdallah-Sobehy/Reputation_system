@@ -1,6 +1,8 @@
 ## @package computation
 # contains functions related to the theoritical proof of convergence equation
 # R = (I - A[normal])^-1 ( h + A[forceful] * R[F])
+# Also functions relate to calculations for the simulation of different strategies e.g. percentage of positive nodes
+from __future__ import division # to allow integer division to produce a floating point
 from scipy import linalg
 import numpy as np
 import networkx as nx
@@ -87,3 +89,33 @@ def R_inf(G,alpha):
 
 	R = (linalg.inv(I-A)).dot(h+(AF.dot(RF)))
 	return R;
+
+##
+# Calculates the percentage of normal positive, negative and neutral nodes depending on a given neutral range around 0
+# @param G graph to calculate the percentage of different nodes from
+# @param neutral_range a number that any node with an opinion between its negative and positive value is considered neutral
+# returs a list of three elements storing with the following order:
+# [0]positive nodes percentage, [1] negative nodes percentage and [2] neutral nodes percentage 
+#
+def percentages(G,neutral_range):
+	all_peers = nx.number_of_nodes(G)
+	# normal peers are all peers except the forceful ones
+	n = all_peers - 2
+	pos_percent = neg_percent = neutral_perc = 0
+	for i in range(n):
+		if G.node[i]['opinion'] < - neutral_range:
+			neg_percent +=1
+		elif G.node[i]['opinion'] > neutral_range:
+			pos_percent +=1
+		elif G.node[i]['opinion'] >= - neutral_range and G.node[i]['opinion'] <= neutral_range:
+			neutral_perc +=1
+		else:
+			try:
+				raise ex.UncategorizedNodeError(i)
+			except ex.UncategorizedNodeError as un:
+					print 'warning a node [',i,'] out of the specifed categories according to opinion'
+	pos_percent /= n
+	neg_percent /= n
+	neutral_perc /= n
+#	print 'Positive nodes: %f\nNegative nodes: %f\nNeutral Nodes: %f' %(pos_percent,neg_percent,neutral_perc)
+	return [pos_percent,neg_percent,neutral_perc]

@@ -58,8 +58,8 @@ def R_itr(G,ALPHA):
 		local_update(G,ALPHA)
 		max_diff = max_opinion_difference(G, G_copy)
 		num_loops += 1
-	print 'The maximum difference = ', max_diff
-	print 'number of loops until conversion = ', num_loops
+#	print 'The maximum difference = ', max_diff
+#	print 'number of loops until conversion = ', num_loops
 	# R_itr contains opinion of nodes due to iterations
 	R_itr = []
 	for n in range(G.number_of_nodes()-2):
@@ -234,11 +234,9 @@ def strategy_1_D(G, budget):
 		tmp += [degrees[i]] 
 	# computes the reciprocal of all degrees
 	degrees_recp = []
-	try:
-		for i in range(len(tmp)):
-			degrees_recp += [1/tmp[i]]
-	except ZeroDivisionError:
-		sys.exit('Division by zero when calculating neighbors for 1/D strategy\ndue to the presence of a node with zero degree')
+
+	for i in range(len(tmp)):
+		degrees_recp += [1/tmp[i]]
 
 	# summation of all reciprocals
 	sum_degs_recp = sum(degrees_recp)

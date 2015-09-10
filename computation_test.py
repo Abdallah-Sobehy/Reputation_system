@@ -58,5 +58,24 @@ class ComputationTest(ut.TestCase):
 		h = cp.vec_h(self.G,self.alpha)
 		R_inf_exp = (linalg.inv(I-A)).dot(h+(AF_exp.dot(RF)))
 		np.testing.assert_array_almost_equal(cp.R_inf(self.G,self.alpha),R_inf_exp,7,'Error in R_inf function')
+
+	# Testing percentages function
+	def test_percentages(self):
+		neutral_range = 0.001
+		self.G.node[0]['opinion'] = 0.001 # neutral
+		self.G.node[1]['opinion'] = 0.01 # positive
+		self.G.node[2]['opinion'] = -0.5 # negative
+		percentages_exp = [1/3,1/3,1/3]
+		np.testing.assert_array_equal(cp.percentages(self.G,neutral_range),percentages_exp)
+
+
+		self.G.node[2]['opinion'] = 0.5
+		percentages_exp = [2/3,0/3,1/3]
+		np.testing.assert_array_equal(cp.percentages(self.G,neutral_range),percentages_exp)
+
+		self.G.node[1]['opinion'] = -0.001
+		self.G.node[2]['opinion'] = -0.01
+		percentages_exp = [0/3,1/3,2/3]
+		np.testing.assert_array_equal(cp.percentages(self.G,neutral_range),percentages_exp)
 if __name__ == "__main__":
 	ut.main()

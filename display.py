@@ -16,7 +16,7 @@ def display_graph(G,neutral_range):
 	#fig1.text(0, 0.95, 'forceful +1: dark blue\n forceful -1 dark red', style='italic',fontsize=14, fontweight='bold')
 	thismanager = plt.get_current_fig_manager()
 	thismanager.window.move(0, 0)
-	nx.draw(G,node_size = 250,node_color = color_map, edge_color = 'black', with_labels = True)
+	nx.draw(G,node_size = 180,node_color = color_map, edge_color = 'black', with_labels = False)
 	
 	# Reseed
 	np.random.seed(SEED)
@@ -25,7 +25,7 @@ def display_graph(G,neutral_range):
 	fig2.text(0, 0.95, 'nodes are neutral in the range from -'+str(neutral_range)+ ' to ' + str(neutral_range), style='italic',fontsize=14)
 	thismanager = plt.get_current_fig_manager()
 	thismanager.window.move(700, 0)
-	nx.draw(G,node_size = 250,node_color = color_map, edge_color = 'black', with_labels = True)
+	nx.draw(G,node_size = 180,node_color = color_map, edge_color = 'black', with_labels = False)
 	plt.show()
 	return;
 
@@ -69,6 +69,8 @@ def color_graph_cat(G):
 ##
 # colors graph to distinguish between nodes according to their opinion
 # categories: +1, -1, less than neutral range, neutral, more than neutral range
+# @param G graph to be drawn
+# @param neutral_range a number that any node with an opinion between its negative and positive value is considered neutral
 #
 def color_graph_op(G,neutral_range):
 	n = nx.number_of_nodes(G)
