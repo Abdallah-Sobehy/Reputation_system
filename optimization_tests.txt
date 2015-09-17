@@ -1,0 +1,45 @@
+SEED = 1442232808
+
+NUM_PEERS = 100
+G_TYPE = 'barabasi_albert' # Graph type: random, geometric, scale_free (barabasi_albert)
+G_CHAR = 5
+ALPHA = 0.3 # weight given to self opinion
+STRATEGY1 = 'D' # strategy chosen by first forceful peer ((+1))
+BUDGET1 = 50 # number of edges allowed for first forceful peer 
+STRATEGY2 = 'D^2' # strategy chosen by second forceful peer ((-1))
+BUDGET2 = 50 # number of edges allowed for second forceful peers
+NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
+SIMULATIONS = 50 # Number of repition of a match between 2 strategies
+
+Results before optimization:
+1-seed used: 1442232808
+After 50 simulations: D strategy budget = 50, D^2 strategy budget = 50
+			 D strategy 	 D^2 strategy	 neutral
+Follwers percentage	 48.28% 		 48.34% 	 3.38%
+Winning percentage:	 50.00% 		 46.00% 	 4.00%
+
+
+
+2-Then with Strategies 1 and 2 to be random and 1/D:
+seed used: 1442232808
+After 50 simulations: random strategy budget = 50, 1/D strategy budget = 50
+			 random strategy 	 1/D strategy	 neutral
+Follwers percentage	 52.94% 		 44.80% 	 2.26%
+Winning percentage:	 78.00% 		 16.00% 	 6.00%
+Time elapsed 3.911777
+
+
+Same with 500 simulations:
+1- seed used: 1442232808
+After 500 simulations: D strategy budget = 50, D^2 strategy budget = 50
+			 D strategy 	 D^2 strategy	 neutral
+Follwers percentage	 48.21% 		 48.86% 	 2.93%
+Winning percentage:	 45.00% 		 49.80% 	 5.20%
+Time elapsed 35.069335
+
+2-seed used: 1442232808
+After 500 simulations: random strategy budget = 50, 1/D strategy budget = 50
+			 random strategy 	 1/D strategy	 neutral
+Follwers percentage	 52.65% 		 44.87% 	 2.48%
+Winning percentage:	 78.40% 		 17.40% 	 4.20%
+Time elapsed 38.774205

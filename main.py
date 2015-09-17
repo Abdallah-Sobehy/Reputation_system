@@ -11,27 +11,26 @@ import time
 import excp as ex
 import sys
 import display as d
-#import pydot
-#import graphviz
+
 
 # Macros like variables
 start_time = time.time()
-#SEED = 1441804756
-SEED = int(start_time)
+SEED = 1442232808
+#SEED = int(start_time)
 NUM_PEERS = 100
-G_TYPE = 'random' # Graph type: random, geometric, scale_free
+G_TYPE = 'barabasi_albert' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
-#for barabasi alber graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 0.1 
+#for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
+G_CHAR = 5
 ALPHA = 0.3 # weight given to self opinion
-STRATEGY1 = 'random' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 200 # number of edges allowed for first forceful peer 
+STRATEGY1 = 'D' # strategy chosen by first forceful peer ((+1))
+BUDGET1 = 50 #number of edges allowed for first forceful peer 
 STRATEGY2 = 'D^2' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 200 # number of edges allowed for second forceful peer
+BUDGET2 = 50 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
-SIMULATIONS = 20000 # Number of repition of a match between 2 strategies
+SIMULATIONS = 50 # Number of repition of a match between 2 strategies
 
 # seed the random generator
 np.random.seed(SEED)  ;rd.seed(SEED)
@@ -78,23 +77,23 @@ for i in range(SIMULATIONS):
 	elif neg_percent[i] > pos_percent[i]:
 		S2_win_percent += 1
 	else : tie_percent += 1
-S1_win_percent /= SIMULATIONS
-S2_win_percent /= SIMULATIONS
-tie_percent /= SIMULATIONS
-	# Print result each 100 simulation match
-#	if i%100 == 0:
-#		print '%f, %f,%f'%(np.sum(pos_percent)/(i+1), np.sum(neg_percent)/(i+1), np.sum(neutral_percent)/(i+1))
+S1_win_percent = (S1_win_percent/SIMULATIONS)*100 
+S2_win_percent = (S2_win_percent/SIMULATIONS)*100
+tie_percent = (tie_percent/SIMULATIONS)*100
+
 	# Asserting that R_inf calculated by equation and iteration are equal to decimal places
 #	try:
 #		np.testing.assert_array_almost_equal(R_inf,R_itr,4)
 #	except AssertionError:
 #		sys.exit('ConvergenceError: convergence of R_inf is not correct to 4 decimal places\nProgram will terminate')
+
 print 'seed used:', SEED
-print 'After %d simulations\n\t\t\t %s strategy \t %s strategy\t neutral' %(SIMULATIONS,STRATEGY1,STRATEGY2)
-print 'Follwers percentage\t %.4f \t\t %.4f \t %.4f' %(np.mean(pos_percent),np.mean(neg_percent),np.mean(neutral_percent)) 
-#print 'After %d simulations\n%s strategy nodes: %.4f\n%s strategy nodes: %.4f\nNeutral Nodes: %.4f' %(SIMULATIONS,STRATEGY1,np.mean(pos_percent),STRATEGY2,np.mean(neg_percent),np.mean(neutral_percent))
-print 'Winning percentage:\t %.4f \t\t %.4f \t %.4f' %(S1_win_percent,S2_win_percent, tie_percent)
+print 'After %d simulations: %s strategy budget = %d, %s strategy budget = %d\n\t\t\t %s strategy \t %s strategy\t neutral' %(SIMULATIONS,STRATEGY1,BUDGET1,STRATEGY2,BUDGET2, STRATEGY1,STRATEGY2)
+print 'Follwers percentage\t %.2f%% \t\t %.2f%% \t %.2f%%' %(np.mean(pos_percent)*100,np.mean(neg_percent)*100,np.mean(neutral_percent)*100) 
+print 'Winning percentage:\t %.2f%% \t\t %.2f%% \t %.2f%%' %(S1_win_percent,S2_win_percent, tie_percent)
 print 'Time elapsed %f' % (time.time() - start_time)
+sys.stdout.write("\a")
 #print '\n'.join(map(str, R_itr))
 # Display the graph categorizing nodes by category and by opinion based on the neutral range
-#d.display_graph(G,NEUTRAL_RANGE)
+#sub_normal = G.subgraph(range(NUM_PEERS))
+#d.display_graph(sub_normal,NEUTRAL_RANGE)
