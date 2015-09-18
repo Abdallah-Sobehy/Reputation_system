@@ -49,7 +49,7 @@ class graphm_test(ut.TestCase):
 	def test_max_opinion_diff(self):
 		gm.local_update(self.G,self.alpha)
 		diff_expected = 0.36
-		diff_actual = gm.max_opinion_difference(self.G,self.G_copy)
+		diff_actual = gm.max_opinion_difference(gm.get_opinion(self.G),gm.get_opinion(self.G_copy))
 		np.testing.assert_almost_equal(diff_actual, diff_expected,7, 'error in max_opinion_difference function')
 	# asserting strategy_D function
 	def test_strategy_D(self):

@@ -25,12 +25,12 @@ G_TYPE = 'barabasi_albert' # Graph type: random, geometric, scale_free (barabasi
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
 G_CHAR = 5
 ALPHA = 0.3 # weight given to self opinion
-STRATEGY1 = 'D' # strategy chosen by first forceful peer ((+1))
+STRATEGY1 = 'random' # strategy chosen by first forceful peer ((+1))
 BUDGET1 = 50 #number of edges allowed for first forceful peer 
-STRATEGY2 = 'D^2' # strategy chosen by second forceful peer ((-1))
+STRATEGY2 = '1/D' # strategy chosen by second forceful peer ((-1))
 BUDGET2 = 50 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
-SIMULATIONS = 50 # Number of repition of a match between 2 strategies
+SIMULATIONS = 500 # Number of repition of a match between 2 strategies
 
 # seed the random generator
 np.random.seed(SEED)  ;rd.seed(SEED)

@@ -42,26 +42,26 @@ def color_graph_cat(G):
 	for i in G:
 		# color for forceful peer +1
 		if G.node[i]['opinion'] == 1:
-			color_map += ['blue']
+			color_map.append('blue')
 		# color for forceful peer -1
 		elif G.node[i]['opinion'] == -1:
-			color_map += ['crimson']
+			color_map.append('crimson')
 		# if neighbor of -1 forceful peer
 		elif n-1 in G.neighbors(i) and n-2 not in G.neighbors(i):
-			color_map += ['lightsalmon']
+			color_map.append('lightsalmon')
 		# if neighbor of +1 forceful peer
 		elif n-2 in G.neighbors(i) and n-1 not in G.neighbors(i):
-			color_map +=['lightskyblue']
+			color_map.append('lightskyblue')
 		# if neighbor of both forceful peers
 		elif n-1 in G.neighbors(i) and n-2 in G.neighbors(i):
-			color_map +=['w']
+			color_map.append('w')
 		# if not connected to any of the forceful peer
 		elif n-2 not in G.neighbors(i) and n-1 not in G.neighbors(i): # If neighbor of none of the forceful peers
-			color_map +=['grey']
+			color_map.append('grey')
 		# a test if a category of nodes has not been covered
 		else :
 			try:
-				color_map += ['limegreen']
+				color_map.append('limegreen')
 				raise ex.UncategorizedNodeError(i)
 			except ex.UncategorizedNodeError as un:
 				print 'warning a node [',i,'] out of the specifed categories\n will be colored in lime green '
@@ -81,23 +81,23 @@ def color_graph_op(G,neutral_range):
 	for i in G:
 		# color for forceful peer +1
 		if G.node[i]['opinion'] == 1:
-			color_map += ['blue']
+			color_map.append('blue')
 		# color for forceful peer -1
 		elif G.node[i]['opinion'] == -1:
-			color_map += ['crimson']
+			color_map.append('crimson')
 		# color for normal peer with negative opinion
 		elif G.node[i]['opinion'] < - neutral_range: 
-			color_map +=['lightsalmon']
+			color_map.append('lightsalmon')
 		# color for normal peer with positive value
 		elif G.node[i]['opinion'] > neutral_range:
-			color_map += ['lightskyblue']
+			color_map.append('lightskyblue')
 		# color for neutral normal peer
 		elif G.node[i]['opinion'] >= - neutral_range and G.node[i]['opinion'] <= neutral_range:
-			color_map += ['grey']
+			color_map.append('grey')
 		# a test if a category of nodes has not been covered
 		else :
 			try:
-				color_map += ['limegreen']
+				color_map.append('limegreen')
 				raise ex.UncategorizedNodeError(i)
 			except ex.UncategorizedNodeError as un:
 				print 'warning a node [',i,'] out of the specifed categories according to opinion\n will be colored in lime green '

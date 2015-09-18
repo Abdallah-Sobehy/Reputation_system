@@ -63,20 +63,20 @@ def R_itr(G,ALPHA):
 	# @var num_loops nuber of loops needed until conversion
 	num_loops = 0
 	while (max_diff > THRESHOLD):
-		# copying an instance of the graph
-		G_copy = nx.MultiGraph(G)
+		# storing opinion values in a list before update at (t-1)
+		op_list_t_1 = get_opinion(G)
 		local_update(G,ALPHA)
-		max_diff = max_opinion_difference(G, G_copy)
+		# storing opinions after update at time t
+		op_list_t = get_opinion(G)
+		max_diff = max_opinion_difference(op_list_t, op_list_t_1)
 		num_loops += 1
 #	print 'The maximum difference = ', max_diff
 #	print 'number of loops until conversion = ', num_loops
 	# R_itr contains opinion of nodes due to iterations
 	R_itr = []
 	for n in range(G.number_of_nodes()-2):
-		R_itr += [[ G.node[n]['opinion']] ]
+		R_itr.append(G.node[n]['opinion'])
 	return R_itr;
-
-
 
 ##
 # updates local opinion of a node using it's own opinion and neighbor's
@@ -84,54 +84,38 @@ def R_itr(G,ALPHA):
 # @param alpha weigh given to the opinion of the node itself
 #
 def local_update(G,alpha):
-	# copying an instance of the graph so that the opinion taken into consideration
-	# are not the ones updated in the same instance in this function
-	G_copy = nx.MultiGraph(G)
-	# stores the keys of all nodes in a list
-	l = list(G_copy.nodes_iter())
-	# Loop all nodes in the list to check for its type
-	for n in l:
+	# storing opinions of all nodes in a list to avoid using updated opinions of neighbors in the process
+	op_list = get_opinion(G)
+	# Loop all nodes in the graph
+	for n in G:
 		# Update is only done to normal peers.
-		if G_copy.node[n]['type'] == 'normal':
+		if G.node[n]['type'] == 'normal':
 			#Iterate and sum all opinions of neighbors
-			list_neighbors = list(nx.all_neighbors(G_copy,n))
-			# Update opinion only if the node has a neighbor
+			list_neighbors = list(nx.all_neighbors(G,n))
+			# Update opinion only if the node has at least one neighbor
 			if (len(list_neighbors) > 0):
 				neighbors_opinion = 0
 				for o in list_neighbors:
-					#num_edges = 1
 					num_edges = G.number_of_edges(n,o)
-					neighbors_opinion += num_edges*G_copy.node[o]['opinion']
+					neighbors_opinion += num_edges*op_list[o]
 				# Local update equation
-				G.node[n]['opinion'] = alpha*G.node[n]['initial_opinion'] + ((1-alpha)/G_copy.degree(n))*neighbors_opinion
+				G.node[n]['opinion'] = alpha*G.node[n]['initial_opinion'] + ((1-alpha)/G.degree(n))*neighbors_opinion
 
 	return;
 
 
 ##
 # Calculate the maximum absolute change in opinion for all nodes between two conceutive iterations
-# @param G_t current updated graph
-# @param G_t_1 graph of previous iteration
+# @param l_t opinion list of current updated graph
+# @param G_t_1 opinion +=list of previous iteration
 #
-def max_opinion_difference(G_t, G_t_1):
-	# store the opinion of nodes in both graphs in two lists
-	# store the keys of all nodes in a list
-	l_tmp = list(G_t.nodes_iter())
-	# use stored keys to access both graphs
-	# list of opinions for both graphs initialized to be empty
-	l_t = []
-	l_t_1 = []
-	# for each loop the opinion is added to each of the two lists
-	for n in l_tmp:
-		l_t += [ G_t.node[n]['opinion'] ]
-		l_t_1 += [ G_t_1.node[n]['opinion'] ]
+def max_opinion_difference(l_t, l_t_1):
 	#subtract opinions and store the differnce in list
+	l_diff = []
 	l_diff = list(map(op.sub, l_t, l_t_1))
-	# change all values in l_diff list to absolute ones to avoid negative numbers
-	i = 0
-	for n in l_diff:
-		l_diff[i] = abs(n)
-		i += 1
+	# Compute list of the difference in opinions
+	for i in range(len(l_t)):
+		l_diff[i] = abs(l_t[i] - l_t_1[i])
 	# return the maximum value in l_difference 
 	return max(l_diff);
 
@@ -202,7 +186,7 @@ def strategy_D(G, budget):
 	num_edges = G.number_of_edges()
 	# iterate nodes to calculate limits depending on degree
 	for i in G:
-		limits += [G.degree(i)/(2*num_edges) + limits[i]]
+		limits.append(G.degree(i)/(2*num_edges) + limits[i])
 	return select_neighbors(limits, budget)
 
 ##
@@ -218,14 +202,14 @@ def strategy_D2(G, budget):
 	degrees = G.degree()
 	tmp = []
 	for i in range(len(degrees)):
-		tmp += [degrees[i]]
+		tmp.append(degrees[i])
 	# squaring all degrees in the list
 	degrees2 = [x**2 for x in tmp]	
 	# summation of (degrees^2) for all nodes
 	sum_degs2 = sum(degrees2)
 	# iterate nodes to calculate limits depending on degree
 	for i in G:
-		limits += [(G.degree(i)** 2)/sum_degs2 + limits[i]]
+		limits.append((G.degree(i)** 2)/sum_degs2 + limits[i])
 	return select_neighbors(limits, budget)
 
 ##
@@ -241,18 +225,18 @@ def strategy_1_D(G, budget):
 	degrees = G.degree()
 	tmp = []
 	for i in range(len(degrees)):
-		tmp += [degrees[i]] 
+		tmp.append(degrees[i]) 
 	# computes the reciprocal of all degrees
 	degrees_recp = []
 
 	for i in range(len(tmp)):
-		degrees_recp += [1/tmp[i]]
+		degrees_recp.append(1/tmp[i])
 
 	# summation of all reciprocals
 	sum_degs_recp = sum(degrees_recp)
 	for i in G:
 		try:
-			limits += [((1/G.degree(i))/sum_degs_recp) + limits[i]]
+			limits.append( ((1/G.degree(i))/sum_degs_recp) + limits[i] )
 		except ZeroDivisionError:
 			sys.exit('Division by zero when calculating neighbors for 1/D strategy\ndue to the presence of a node with zero degree')
 	return select_neighbors(limits, budget)
@@ -270,5 +254,16 @@ def select_neighbors(limits, budget):
 		# compare the random number to the limits and add node accordingly
 		for j in range(len(limits) - 1):
 			if rnd >= limits[j] and rnd < limits[j+1]:
-				f_neighbors += [j]
+				f_neighbors.append(j)
 	return f_neighbors;
+
+##
+# Helping function to get the opinions of nodes in a graph
+# @param G graph to extract the opinion of its nodes
+# returns list of opinions
+#
+def get_opinion(G):
+	op_list = []
+	for i in G:
+		op_list.append(G.node[i]['opinion'])
+	return op_list;
