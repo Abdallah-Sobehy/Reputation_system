@@ -19,7 +19,7 @@ def display_graph(G,neutral_range):
 	#fig1.text(0, 0.95, 'forceful +1: dark blue\n forceful -1 dark red', style='italic',fontsize=14, fontweight='bold')
 	thismanager = plt.get_current_fig_manager()
 	thismanager.window.move(0, 0)
-	nx.draw_graphviz(G,node_size = 80,node_color = color_map, edge_color = 'black', with_labels = False)
+	nx.draw(G,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
 	
 	# Reseed
 	np.random.seed(SEED)
@@ -28,7 +28,7 @@ def display_graph(G,neutral_range):
 	fig2.text(0, 0.95, 'nodes are neutral in the range from -'+str(neutral_range)+ ' to ' + str(neutral_range), style='italic',fontsize=14)
 	thismanager = plt.get_current_fig_manager()
 	thismanager.window.move(700, 0)
-	nx.draw_graphviz(G,node_size = 80,node_color = color_map, edge_color = 'black', with_labels = False)
+	nx.draw(G,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
 	plt.show()
 	return;
 
