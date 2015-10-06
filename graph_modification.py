@@ -112,11 +112,10 @@ def local_update(G,alpha):
 def max_opinion_difference(l_t, l_t_1):
 	#subtract opinions and store the differnce in list
 	l_diff = []
-	l_diff = list(map(op.sub, l_t, l_t_1))
-	# Compute list of the difference in opinions
 	for i in range(len(l_t)):
-		l_diff[i] = abs(l_t[i] - l_t_1[i])
+		l_diff.append(abs(l_t[i] - l_t_1[i]))
 	# return the maximum value in l_difference 
+	#print max(l_diff)
 	return max(l_diff);
 
 ##
