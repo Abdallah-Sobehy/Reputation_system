@@ -15,8 +15,8 @@ import display as d
 
 # Macros like variables
 start_time = time.time()
-SEED = 1442232808
-#SEED = int(start_time)
+#SEED = 1442232808
+SEED = int(start_time)
 NUM_PEERS = 100
 G_TYPE = 'barabasi_albert' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
@@ -62,7 +62,7 @@ for i in range(SIMULATIONS):
 		continue
 	# Calculate final opinion vector by equation, considering the presence of 
 	# 2 forceful peers in the last 2 indices of the graph
-#	R_inf = cp.R_inf(G,ALPHA)
+	R_inf = cp.R_inf(G,ALPHA)
 	# Calculate final opinion vector by iterations
 	R_itr = gm.R_itr(G,ALPHA)
 	# Calculate the percentage of normal peers that followed either of the forceful peers
@@ -81,11 +81,11 @@ S1_win_percent = (S1_win_percent/SIMULATIONS)*100
 S2_win_percent = (S2_win_percent/SIMULATIONS)*100
 tie_percent = (tie_percent/SIMULATIONS)*100
 
-	# Asserting that R_inf calculated by equation and iteration are equal to decimal places
-#	try:
-#		np.testing.assert_array_almost_equal(R_inf,R_itr,4)
-#	except AssertionError:
-#		sys.exit('ConvergenceError: convergence of R_inf is not correct to 4 decimal places\nProgram will terminate')
+# Asserting that R_inf calculated by equation and iteration are equal to decimal places
+try:
+	np.testing.assert_array_almost_equal(R_inf,R_itr,4)
+except AssertionError:
+	sys.exit('ConvergenceError: convergence of R_inf is not correct to 4 decimal places\nProgram will terminate')
 
 print 'seed used:', SEED
 print 'After %d simulations: %s strategy budget = %d, %s strategy budget = %d\n\t\t\t %s strategy \t %s strategy\t neutral' %(SIMULATIONS,STRATEGY1,BUDGET1,STRATEGY2,BUDGET2, STRATEGY1,STRATEGY2)
