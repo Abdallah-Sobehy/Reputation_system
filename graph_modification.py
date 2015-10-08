@@ -75,7 +75,7 @@ def R_itr(G,ALPHA):
 	# R_itr contains opinion of nodes due to iterations
 	R_itr = []
 	for n in range(G.number_of_nodes()-2):
-		R_itr.append(G.node[n]['opinion'])
+		R_itr.append([G.node[n]['opinion']])
 	return R_itr;
 
 ##
@@ -110,12 +110,10 @@ def local_update(G,alpha):
 # @param G_t_1 opinion +=list of previous iteration
 #
 def max_opinion_difference(l_t, l_t_1):
-	#subtract opinions and store the differnce in list
+	#subtract opinions and store the absolute difference in list
 	l_diff = []
-	l_diff = list(map(op.sub, l_t, l_t_1))
-	# Compute list of the difference in opinions
 	for i in range(len(l_t)):
-		l_diff[i] = abs(l_t[i] - l_t_1[i])
+		l_diff.append(abs(l_t[i] - l_t_1[i]))
 	# return the maximum value in l_difference 
 	return max(l_diff);
 
