@@ -15,7 +15,7 @@ import display as d
 
 # Macros like variables
 start_time = time.time()
-SEED = 1444244846
+SEED = 1444244840
 #SEED = int(start_time)
 NUM_PEERS = 100
 G_TYPE = 'geometric' # Graph type: random, geometric, scale_free (barabasi_albert)
@@ -25,12 +25,12 @@ G_TYPE = 'geometric' # Graph type: random, geometric, scale_free (barabasi_alber
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
 G_CHAR = 0.2
 ALPHA = 0.3 # weight given to self opinion
-STRATEGY1 = 'D' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 10 #number of edges allowed for first forceful peer 
-STRATEGY2 ='D^2' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 10 # number of edges allowed for second forceful peers
+STRATEGY1 = 'random' # strategy chosen by first forceful peer ((+1))
+BUDGET1 = 50 #number of edges allowed for first forceful peer 
+STRATEGY2 ='D' # strategy chosen by second forceful peer ((-1))
+BUDGET2 = 50 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
-SIMULATIONS = 15000 # Number of repition of a match between 2 strategies
+SIMULATIONS = 1 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
 # seed the random generator
 np.random.seed(SEED)  ;rd.seed(SEED)
@@ -51,6 +51,7 @@ i = 0
 while i < SIMULATIONS:
 	# Initialize an erdos renyi graph
 	G = gm.create_graph(G_TYPE,NUM_PEERS, G_CHAR)
+	np.random.seed(SEED)
 	# Add 2 forceful peers with chosen strategy
 	try:
 		gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
@@ -92,6 +93,6 @@ print 'Highest follwers percentage of ', STRATEGY2,': ', S2_highest
 sys.stdout.write("\a")
 #input("Press Enter to continue...")
 #print '\n'.join(map(str, R_itr))
-# Display the graph categorizing nodes by category and by opinion based on the neutral range
-#sub_normal = G.subgraph(range(NUM_PEERS))
-#d.display_graph(sub_normal,NEUTRAL_RANGE)
+# Display the graph including forceful peers (NUM_PEERS+2) or not (NUM_PEERS)categorizing nodes by category and by opinion based on the neutral range
+np.random.seed(SEED)
+d.display_graph(G,NEUTRAL_RANGE,NUM_PEERS,SEED)

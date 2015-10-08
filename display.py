@@ -10,36 +10,53 @@ import numpy as np
 
 ##
 # draws the graph according to both category and opinion
+# @param G graph to be displayed
+# @param neutral_range opinion between + and - of this value are considered neutral
+# @param num_nodes number of nodes to be displayed: expected to be either all or without forceful peers
+# @param SEED can be used to regenerate the same layout.
 #
-def display_graph(G,neutral_range):
+def display_graph(G,neutral_range,num_nodes,SEED):
 	# Seed for the graph creation to have the two graphs (category and opinion) with the same shape
-	SEED = int(time.time()) ; np.random.seed(SEED) 
+	np.random.seed(SEED)
+	total_nodes = nx.number_of_nodes(G) 
 	color_map = color_graph_cat(G)
-	fig1 = plt.figure('Categories',(8.5,8),dpi=80)
-	#fig1.text(0, 0.95, 'forceful +1: dark blue\n forceful -1 dark red', style='italic',fontsize=14, fontweight='bold')
-	thismanager = plt.get_current_fig_manager()
-	thismanager.window.move(0, 0)
-	nx.draw(G,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
+	# Getting positions for normal peers in the case of geometric graph, setting the positions of forceful ones 
+	if G.graph['type'] == 'geometric':
+		node_pos = nx.get_node_attributes(G,'pos')
+		node_pos[total_nodes-2] = [0.5,0.55]
+		node_pos[total_nodes-1] = [0.5, 0.45]
+	else : node_pos = None
+	# Figure 1 shows nodes according to their connection with forceful peers
+	# fig1 = plt.figure('Categories ' +G.node[total_nodes-2]['type']+ ' VS '+G.node[total_nodes-1]['type'],(8.5,8),dpi=80)
+	# fig1.text(0, 0.97, 'Light blue: connected to '+ G.node[total_nodes-2]['type']+' ,Light red: connected to '+ G.node[total_nodes-1]['type'], style='italic',fontsize=14)
+	# fig1.text(0, 0.94, 'White: connected to both,  Grey: Not connected to a forceful peer ', style='italic',fontsize=14)
+	# thismanager = plt.get_current_fig_manager()
+	# thismanager.window.move(0, 0)
+	# nx.draw(G.subgraph(xrange(num_nodes)),node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
 	
-	# Reseed
+	# Reseed to get the eact similar graph as figure 1
 	np.random.seed(SEED)
 	color_map = color_graph_op(G,neutral_range)
-	fig2 = plt.figure('Opinion',(8.5,8),dpi=80)
-	fig2.text(0, 0.95, 'nodes are neutral in the range from -'+str(neutral_range)+ ' to ' + str(neutral_range), style='italic',fontsize=14)
+	# Figure 2 shows nodes according to their opinions
+	fig2 = plt.figure('Opinion '+G.node[total_nodes-2]['type']+ ' VS '+G.node[total_nodes-1]['type'] ,(8.5,8),dpi=80)
+	fig2.text(0, 0.97, 'neutral range: '+str(neutral_range)+ '-' + str(neutral_range), style='italic',fontsize=14)
+	fig2.text(0, 0.94, 'Light blue: following '+ G.node[total_nodes-2]['type']+' ,Light red: following '+ G.node[total_nodes-1]['type'], style='italic',fontsize=14)
+	fig2.text(0, 0.91, 'Grey: neutral nodes', style='italic',fontsize=14)
 	thismanager = plt.get_current_fig_manager()
 	thismanager.window.move(700, 0)
-	nx.draw(G,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
+	nx.draw(G.subgraph(xrange(num_nodes)),node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
 	plt.show()
 	return;
 
 ##
 # colors graph to distinguish between different categories of nodes
 # categories: +1, -1, attached to +1 only, attached to -1 only, attached to both, not attached to any of them
+# @param G graph from which the nodes colors will be chsen accordingly
 #
 def color_graph_cat(G):
 	n = nx.number_of_nodes(G)
 	color_map = []
-	for i in G:
+	for i in xrange(n):
 		# color for forceful peer +1
 		if G.node[i]['opinion'] == 1:
 			color_map.append('blue')
@@ -78,7 +95,7 @@ def color_graph_cat(G):
 def color_graph_op(G,neutral_range):
 	n = nx.number_of_nodes(G)
 	color_map = []
-	for i in G:
+	for i in xrange(n):
 		# color for forceful peer +1
 		if G.node[i]['opinion'] == 1:
 			color_map.append('blue')

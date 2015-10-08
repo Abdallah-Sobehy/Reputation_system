@@ -29,6 +29,7 @@ def create_graph(g_type,num_peers, g_char):
 	else : raise SystemExit('Chosen graph type ['+str(g_type)+'] is not applicable.\nProgram will terminate')
 	# Adding the property of having multiple edges between nodes
 	G = nx.MultiGraph(initial_graph)
+	G.graph['type']= g_type
 	# Assign normal peers with type and opinion
 	assign_normal(G)
 	return G;
@@ -163,8 +164,8 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 
 	# add the forceful peers to the graph, the first is with opinion 1 
 	# The second is with opinion -1
-	G.add_node(n,type = 'f_' + strategy1, opinion = 1)
-	G.add_node(n+1,type = 'f_' + strategy2, opinion = -1)
+	G.add_node(n,type = strategy1, opinion = 1)
+	G.add_node(n+1,type = strategy2, opinion = -1)
 	# iterate the array of neighbors and add an edge
 	for i in f1_neighbors:
 		G.add_edge(n, i)
