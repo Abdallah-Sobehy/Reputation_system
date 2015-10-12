@@ -194,7 +194,7 @@ def strategy_D(G, budget):
 # @param budget number of neighbors the forceful peer will choose
 #
 def strategy_D2(G, budget):
-	# limits is a list that stores floats between 0 and one which defines
+	# limits is a list that stores floats between 0 and 1	 which defines
 	# the probabaility of choosing a certain node depending on its degree
 	limits = [0.0]
 	# store the degree of all nodes in a list
