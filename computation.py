@@ -143,3 +143,42 @@ def update_percentages(new_perc,S1_f, S2_f, neutral, index, wins):
 		wins[1] += 1
 	else : wins[2] += 1
 	return
+
+##
+# returns the number of simulations needed for a a given confidence interval (here it is 0.5%)
+# Equation used: n = (100*z*s)/r*mean)**2 where z is taken as a constant from gaussian distribution curve 
+# for the region (1-alpha/2) where alpha = 0.05, thus, z = 1.96
+# s is standard deviation and r is the confidence interval/2 as a percentage of the mean
+# @param mean measured mean after simulations
+# @param followers_list list containing followers percentage for each simulation for a given strategy
+def get_sim_num(mean, followers_list):
+	# Compute standard deviation
+	s = 0
+	for followers in followers_list:
+		s += ((followers-mean)**2)
+	s *= (1/(len(followers_list)-1))
+	s = np.sqrt(s)
+	z = 1.96
+	# For one percent confidence interval
+	r = 0.5
+	return ((100*z*s)/(r*mean))**2
+##
+# returns precision as a percentage of mean given the number of simulations
+# Equation used r = (100*z*s)/sqrt(n)*mean) where z is taken as a constant from gaussian distribution curve 
+# for the region (1-alpha/2) where alpha = 0.05, thus, z = 1.96
+# s is standard deviation and n is the number of simulations done.
+# @param mean measured mean after simulations
+# @param followers_list list containing followers percentage for each simulation for a given strategy
+# @param n is the number of simulations executed.
+
+def get_precision(mean, followers_list, n):
+	# Compute standard deviation
+	s = 0
+	for followers in followers_list:
+		s += ((followers-mean)**2)
+	s *= (1/(len(followers_list)-1))
+	s = np.sqrt(s)
+	z = 1.96
+
+	return (100*z*s)/(np.sqrt(n)*mean) 
+	

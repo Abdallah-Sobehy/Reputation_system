@@ -15,22 +15,22 @@ import display as d
 
 # Macros like variables
 start_time = time.time()
-SEED = 1444244840
+SEED = 1444249834
 #SEED = int(start_time)
 NUM_PEERS = 100
-G_TYPE = 'barabasi_albert' # Graph type: random, geometric, scale_free (barabasi_albert)
+G_TYPE = 'geometric' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 5
+G_CHAR = 0.2
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = '1/D' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 500 #number of edges allowed for first forceful peer 
+BUDGET1 = 10 #number of edges allowed for first forceful peer 
 STRATEGY2 ='D^2' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 500 # number of edges allowed for second forceful peers
+BUDGET2 = 10 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
-SIMULATIONS = 1 # Number of repition of a match between 2 strategies
+SIMULATIONS = 15000 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
 # seed the random generator
 np.random.seed(SEED)  ;rd.seed(SEED)
@@ -40,11 +40,8 @@ S2_followers = np.zeros(SIMULATIONS)
 neutral = np.zeros(SIMULATIONS)
 # List that stores [S1_wins, S2_wins, ties]
 wins= [0,0,0]
-
-# Represents the highest percentage of followers that followed one of the forceful peers 
-S1_highest = 0.0
-S2_highest = 0.0
-
+# for analytical reasons, store the winning percentage for each simulation for strategy 1
+S1_wins_list = []
 # Loop Simulation times to generate graph and evaluate results.
 # taking into consideration the possibility of having to redo a simulation in case of an edgeless node appears woth 1/D strategy
 i = 0
@@ -66,10 +63,11 @@ while i < SIMULATIONS:
 	R_itr = gm.R_itr(G,ALPHA)
 	# Calculate the percentage of normal peers that followed either of the forceful peers
 	tmp = cp.percentages(G,NEUTRAL_RANGE)
+	# Update S1_wins_list for analytical reason
+	if (tmp[0]>0.5): S1_wins_list.append(1)
+	else: S1_wins_list.append(0)
 	# Update percentages arrays
 	cp.update_percentages(tmp, S1_followers, S2_followers, neutral, i, wins)
-	if S1_followers[i] > S1_highest : S1_highest = S1_followers[i]
-	if S2_followers[i] > S2_highest : S2_highest = S2_followers[i]
 	i += 1
 	# Asserting that R_inf calculated by equation and iteration are equal to decimal places
 	#try:
@@ -87,12 +85,14 @@ print 'After %d simulations: %s strategy budget = %d, %s strategy budget = %d\n\
 print 'Follwers percentage\t %.2f%% \t\t %.2f%% \t %.2f%%' %(np.mean(S1_followers)*100,np.mean(S2_followers)*100,np.mean(neutral)*100) 
 print 'Winning percentage:\t %.2f%% \t\t %.2f%% \t %.2f%%' %(wins[0],wins[1], wins[2])
 print 'Time elapsed %f' % (time.time() - start_time)
-print 'Repeated simulations: ', repeated_sim
-print 'Highest follwers percentage of ', STRATEGY1,': ', S1_highest
-print 'Highest follwers percentage of ', STRATEGY2,': ', S2_highest
+
+
+
+#print 'Repeated simulations: ', repeated_sim
+#print 'The number of simulations needed to obtain 0.5% confidence interval: ',str(cp.get_sim_num(np.mean(S1_followers),S1_followers))
+#print 'The precision after ', str(SIMULATIONS), 'simulations is:', str(cp.get_precision(np.mean(S1_followers),S1_followers,SIMULATIONS))
 sys.stdout.write("\a")
 #input("Press Enter to continue...")
 #print '\n'.join(map(str, R_itr))
 # Display the graph including forceful peers (NUM_PEERS+2) or not (NUM_PEERS)categorizing nodes by category and by opinion based on the neutral range
-np.random.seed(SEED)
-d.display_graph(G,NEUTRAL_RANGE,NUM_PEERS,SEED)
+#d.display_graph(G,NEUTRAL_RANGE,NUM_PEERS,SEED)
