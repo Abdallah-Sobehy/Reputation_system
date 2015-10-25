@@ -66,7 +66,7 @@ while i < SIMULATIONS:
 	if (tmp[0]>0.5): S1_wins_list.append(1)
 	else: S1_wins_list.append(0)
 	# Update percentages arrays
-	#cp.update_percentages(tmp, S1_followers, S2_followers, neutral, i, wins)
+	cp.update_percentages(tmp, S1_followers, S2_followers, neutral, i, wins)
 	i += 1
 	# Asserting that R_inf calculated by equation and iteration are equal to decimal places
 	#try:
