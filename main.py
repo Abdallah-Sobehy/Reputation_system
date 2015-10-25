@@ -15,22 +15,22 @@ import display as d
 
 # Macros like variables
 start_time = time.time()
-SEED = 1444249834
+SEED = 1442232808
 #SEED = int(start_time)
 NUM_PEERS = 100
-G_TYPE = 'geometric' # Graph type: random, geometric, scale_free (barabasi_albert)
+G_TYPE = 'barabasi_albert' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 0.2
+G_CHAR = 5
 ALPHA = 0.3 # weight given to self opinion
-STRATEGY1 = '1/D' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 10 #number of edges allowed for first forceful peer 
-STRATEGY2 ='D^2' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 10 # number of edges allowed for second forceful peers
+STRATEGY1 = 'random' # strategy chosen by first forceful peer ((+1))
+BUDGET1 = 50 #number of edges allowed for first forceful peer 
+STRATEGY2 ='1/D' # strategy chosen by second forceful peer ((-1))
+BUDGET2 = 50 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
-SIMULATIONS = 15000 # Number of repition of a match between 2 strategies
+SIMULATIONS = 50 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
 # seed the random generator
 np.random.seed(SEED)  ;rd.seed(SEED)
@@ -48,7 +48,6 @@ i = 0
 while i < SIMULATIONS:
 	# Initialize an erdos renyi graph
 	G = gm.create_graph(G_TYPE,NUM_PEERS, G_CHAR)
-	np.random.seed(SEED)
 	# Add 2 forceful peers with chosen strategy
 	try:
 		gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
@@ -58,7 +57,7 @@ while i < SIMULATIONS:
 		continue
 	# Calculate final opinion vector by equation, considering the presence of 
 	# 2 forceful peers in the last 2 indices of the graph
-	#R_inf = cp.R_inf(G,ALPHA)
+	R_inf = cp.R_inf(G,ALPHA)
 	# Calculate final opinion vector by iterations
 	R_itr = gm.R_itr(G,ALPHA)
 	# Calculate the percentage of normal peers that followed either of the forceful peers
@@ -67,7 +66,7 @@ while i < SIMULATIONS:
 	if (tmp[0]>0.5): S1_wins_list.append(1)
 	else: S1_wins_list.append(0)
 	# Update percentages arrays
-	cp.update_percentages(tmp, S1_followers, S2_followers, neutral, i, wins)
+	#cp.update_percentages(tmp, S1_followers, S2_followers, neutral, i, wins)
 	i += 1
 	# Asserting that R_inf calculated by equation and iteration are equal to decimal places
 	#try:
@@ -85,7 +84,6 @@ print 'After %d simulations: %s strategy budget = %d, %s strategy budget = %d\n\
 print 'Follwers percentage\t %.2f%% \t\t %.2f%% \t %.2f%%' %(np.mean(S1_followers)*100,np.mean(S2_followers)*100,np.mean(neutral)*100) 
 print 'Winning percentage:\t %.2f%% \t\t %.2f%% \t %.2f%%' %(wins[0],wins[1], wins[2])
 print 'Time elapsed %f' % (time.time() - start_time)
-
 
 
 #print 'Repeated simulations: ', repeated_sim

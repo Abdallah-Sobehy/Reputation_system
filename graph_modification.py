@@ -19,16 +19,18 @@ import excp as ex
 def create_graph(g_type,num_peers, g_char):
 	if g_type == 'random':
 		# Initialize an erdos renyi graph with probability g_char
-		initial_graph = nx.erdos_renyi_graph(num_peers,g_char)
+		G = nx.erdos_renyi_graph(num_peers,g_char)
 	elif g_type == 'geometric':
 		# Initialize a random geometric graph with radius g_char
-		initial_graph = nx.random_geometric_graph(num_peers,g_char)
+		G = nx.random_geometric_graph(num_peers,g_char)
 	elif g_type == 'barabasi_albert':
 		# Initialize a barbasi albert graph with g_char starting nodes
-		initial_graph = nx.barabasi_albert_graph(num_peers,g_char)
+		G = nx.barabasi_albert_graph(num_peers,g_char)
 	else : raise SystemExit('Chosen graph type ['+str(g_type)+'] is not applicable.\nProgram will terminate')
 	# Adding the property of having multiple edges between nodes
-	G = nx.MultiGraph(initial_graph)
+	#G = nx.MultiGraph(G)
+	for e in G.edges_iter():
+		G[e[0]][e[1]]['weight'] = 1
 	G.graph['type']= g_type
 	# Assign normal peers with type and opinion
 	assign_normal(G)
@@ -71,8 +73,8 @@ def R_itr(G,ALPHA):
 		op_list_t = get_opinion(G)
 		max_diff = max_opinion_difference(op_list_t, op_list_t_1)
 		num_loops += 1
-#	print 'The maximum difference = ', max_diff
-#	print 'number of loops until conversion = ', num_loops
+	#print 'The maximum difference = ', max_diff
+	#print 'number of loops until conversion = ', num_loops
 	# R_itr contains opinion of nodes due to iterations
 	R_itr = []
 	for n in range(G.number_of_nodes()-2):
@@ -96,12 +98,13 @@ def local_update(G,alpha):
 			# Update opinion only if the node has at least one neighbor
 			if (len(list_neighbors) > 0):
 				neighbors_opinion = 0
+				# the total weight of all edges connected to node n
+				edges_weight = 0
 				for o in list_neighbors:
-					num_edges = G.number_of_edges(n,o)
-					neighbors_opinion += num_edges*op_list[o]
+					neighbors_opinion += G[n][o]['weight']*op_list[o]
+					edges_weight += G[n][o]['weight']
 				# Local update equation
-				G.node[n]['opinion'] = alpha*G.node[n]['initial_opinion'] + ((1-alpha)/G.degree(n))*neighbors_opinion
-
+				G.node[n]['opinion'] = alpha*G.node[n]['initial_opinion'] + ((1-alpha)/edges_weight)*neighbors_opinion
 	return;
 
 
@@ -168,9 +171,15 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 	G.add_node(n+1,type = strategy2, opinion = -1)
 	# iterate the array of neighbors and add an edge
 	for i in f1_neighbors:
-		G.add_edge(n, i)
+		# If an edge already exists between the 2 nodes increase the weight.
+		if G.number_of_edges(n,i) > 0: 
+			G[n][i]['weight'] +=1
+		else:G.add_edge(n, i, weight = 1)
 	for i in f2_neighbors:
-		G.add_edge(n+1,i)
+		# If an edge already exists between the 2 nodes increase the weight.
+		if G.number_of_edges(n+1,i) > 0:
+			G[n+1][i]['weight'] +=1
+		else: G.add_edge(n+1,i, weight = 1)
 	return;
 
 ##

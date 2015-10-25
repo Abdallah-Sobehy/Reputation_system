@@ -44,7 +44,11 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 	fig2.text(0, 0.91, 'Grey: neutral nodes', style='italic',fontsize=14)
 	thismanager = plt.get_current_fig_manager()
 	thismanager.window.move(700, 0)
-	nx.draw(G.subgraph(xrange(num_nodes)),node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
+	node_pos=nx.spring_layout(G)
+	# nx.draw_networkx(G.subgraph(xrange(num_nodes)),node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
+	nx.draw_networkx(G,node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
+	edge_labels = dict (( (i,j),G[i][j]['weight']) for (i,j) in G.edges())
+	nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
 	plt.show()
 	return;
 

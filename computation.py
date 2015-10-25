@@ -23,12 +23,14 @@ def mat_A(G, alpha):
 	for i in range(0,n):
 		# store keys of all neighbors in a list
 		l_neighbors = G.neighbors(i)
-		# store the degree of i
-		deg = G.degree(i)
+		# Calculate the total weight of all edges connected to i
+		edges_weight = 0
+		for neighbor in l_neighbors:
+			edges_weight += G[i][neighbor]['weight']
 		# update A[i,j] if j is a neighbor of i
 		for j in range(0,n):
 			if j in l_neighbors:
-				A[i,j] = (1-alpha)/deg
+				A[i,j] = (1-alpha)/edges_weight
 	return A;
 
 ##
@@ -46,11 +48,14 @@ def mat_AF(G, alpha):
 	AF = np.zeros(shape=(n,2))
 	# Iterate for all rows of the matrix
 	for i in range(n):
+		edges_weight = 0
+		for neighbor in G.neighbors(i):
+			edges_weight += G[i][neighbor]['weight']
 		# fill for the 2 columns (representing connection to forceful peers)
 		if n in G.neighbors(i):
-			AF[i,0] = ((1-alpha)/G.degree(i))*G.number_of_edges(i,n)
+			AF[i,0] = ((1-alpha)/edges_weight)*G[i][n]['weight']
 		if n+1 in G.neighbors(i):
-			AF[i,1] = ((1-alpha)/G.degree(i))*G.number_of_edges(i,n+1)
+			AF[i,1] = ((1-alpha)/edges_weight)*G[i][n+1]['weight']
 	return AF;
 ##
 # creates the h vector that contains the initial opinions of all nodes in the graph multiplied by alpha
