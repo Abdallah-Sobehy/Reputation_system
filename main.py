@@ -49,15 +49,18 @@ while i < SIMULATIONS:
 	# Initialize an erdos renyi graph
 	G = gm.create_graph(G_TYPE,NUM_PEERS, G_CHAR)
 	# Add 2 forceful peers with chosen strategy
+	# Exception is thrown if there is an isolated node (ZeroDivision) or if the graph is not connected
+	# In both cases the simulation is repeated
 	try:
+		if not nx.is_connected(G): raise Exception('Graph is not connected')
 		gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
-	except ZeroDivisionError:
+	except Exception as exp:
 		# Ignore this simulation and do another one
 		repeated_sim += 1
 		continue
 	# Calculate final opinion vector by equation, considering the presence of 
 	# 2 forceful peers in the last 2 indices of the graph
-	R_inf = cp.R_inf(G,ALPHA)
+	#R_inf = cp.R_inf(G,ALPHA)
 	# Calculate final opinion vector by iterations
 	R_itr = gm.R_itr(G,ALPHA)
 	# Calculate the percentage of normal peers that followed either of the forceful peers
