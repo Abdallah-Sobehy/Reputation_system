@@ -124,11 +124,11 @@ def max_opinion_difference(l_t, l_t_1):
 ##
 # Adding 2 forceful peers with one of the 4 strategies each
 # Strategies: Random, Degree, 1/Degree, Degree ^ 2
-# @param G graph whch the forceful nodes is to be added to
-# @param strategy1 strategy by first forceful peer by which it will choose its nodes
-# @param budget1 the number of edges the first forceful peer can have
-# @param strategy2 strategy by second forceful peer by which it will choose its nodes
-# @param budget2 the number of edges the second forceful peer can have
+# @param G graph which the forceful peer is to be added to
+# @param strategy1 strategy by first forceful peer by which it will choose its neighbors
+# @param budget1 the total edge weights the first forceful peer can have
+# @param strategy2 strategy by second forceful peer by which it will choose its neighbors
+# @param budget2 the total edge weights the second forceful peer can have
 #
 def add_forceful(G, strategy1, budget1, strategy2, budget2):
 	n = nx.number_of_nodes(G)
@@ -181,6 +181,56 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 			G[n+1][i]['weight'] +=1
 		else: G.add_edge(n+1,i, weight = 1)
 	return;
+
+##
+# Adding one forceful peers with one of the 4 strategies each
+# Strategies: Random, Degree, 1/Degree, Degree ^ 2
+# This function assumes no forceful peer has already been added to the graph
+# @param G graph which the forceful peer is to be added to
+# @param strategy strategy of the forceful peer by which it will choose its neigbors
+# @param budget the total edge weights the forceful peer can have
+#
+def add_one_forceful(G, strategy, budget):
+	n = nx.number_of_nodes(G)
+	# Selection of neighbors depending on chosen strategy for forceful peer
+	if strategy == 'random':
+		# Create a list of 'budget' random numbers [0, NUM_PEERS]
+		f_neighbors = np.random.random_integers(0, n - 1, budget)
+	elif strategy == 'D':
+		# call strategy_D function to calculate neighbors of forceful peer
+		f_neighbors = strategy_D(G,budget)
+	elif strategy == 'D^2':
+		# call strategy_D2 function to calculate neighbors for forceful peer
+		f_neighbors = strategy_D2(G, budget)
+	elif strategy == '1/D':
+		# call strategy_1_D function to calculate neighbors for forceful peer
+		f_neighbors = strategy_1_D(G, budget)
+	else:
+		raise SystemExit('Chosen strategy for forceful peer [[' + strategy1+ ']] is not applicable\nprogram will exit');
+
+	# add the forceful peers to the graph, with opinion 1 
+	G.add_node(n,type = strategy, opinion = 1)
+	# iterate the array of neighbors and add an edge
+	for i in f_neighbors:
+		# If an edge already exists between the 2 nodes increase the weight.
+		if G.number_of_edges(n,i) > 0: 
+			G[n][i]['weight'] +=1
+		else:G.add_edge(n, i, weight = 1)
+	return;
+
+##
+# Adds a forceful peer that is connected to all normal peers with a given weight
+# @param G input graph
+# @param lamda the weight of each edge from the forceful peer
+#
+def connect_to_all(G,lamda):
+	forceful_key = G.number_of_nodes()
+	G.add_node(forceful_key, type = 'smart', opinion = -1)
+	for n in G.nodes_iter():
+		# Connect an edge only with a normal node
+		if G.node[n]['type'] == 'normal':
+			G.add_edge(forceful_key,n, weight = lamda)
+
 
 ##
 # returns a list of neighbors for a forceful peer with D strategy

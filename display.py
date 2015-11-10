@@ -23,8 +23,10 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 	# Getting positions for normal peers in the case of geometric graph, setting the positions of forceful ones 
 	if G.graph['type'] == 'geometric':
 		node_pos = nx.get_node_attributes(G,'pos')
-		node_pos[total_nodes-2] = [0.5,0.55]
-		node_pos[total_nodes-1] = [0.5, 0.45]
+		if G.node[total_nodes-2]['opinion'] == 1:
+			node_pos[total_nodes-2] = [-1.25,-1]
+		if G.node[total_nodes-1]['opinion'] == -1:
+			node_pos[total_nodes-1] = [1.25, 1]
 	else : node_pos = None
 	# Figure 1 shows nodes according to their connection with forceful peers
 	# fig1 = plt.figure('Categories ' +G.node[total_nodes-2]['type']+ ' VS '+G.node[total_nodes-1]['type'],(8.5,8),dpi=80)
@@ -45,10 +47,16 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 	thismanager = plt.get_current_fig_manager()
 	thismanager.window.move(700, 0)
 	node_pos=nx.spring_layout(G)
+	if G.node[total_nodes-2]['opinion'] == 1:
+		node_pos[total_nodes-2] = [-1.25,-1]
+	if G.node[total_nodes-1]['opinion'] == -1:
+		node_pos[total_nodes-1] = [1.25, 1]
+	node_labels = {n:(n,round(G.node[n]['opinion'],3)) for n in G.nodes_iter()}
 	# nx.draw_networkx(G.subgraph(xrange(num_nodes)),node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
-	nx.draw_networkx(G,node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
-	# edge_labels = dict (( (i,j),G[i][j]['weight']) for (i,j) in G.edges())
-	# nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
+	nx.draw_networkx(G,node_pos,node_size = 700,node_color = color_map, edge_color = 'black', labels = node_labels, with_labels = True, font_size = 10,linewidths=0)
+	edge_labels = dict (( (i,j),G[i][j]['weight']) for (i,j) in G.edges())
+	nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
+	plt.axis('on')
 	plt.show()
 	return;
 

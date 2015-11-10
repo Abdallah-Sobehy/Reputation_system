@@ -187,3 +187,9 @@ def get_precision(mean, followers_list, n):
 
 	return (100*z*s)/(np.sqrt(n)*mean) 
 	
+
+def drange(start, stop, step):
+	r = start
+	while r < stop:
+   		yield r
+   		r += step
