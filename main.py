@@ -13,24 +13,25 @@ import sys
 import display as d
 
 
+
 # Macros like variables
 start_time = time.time()
-SEED = 1442232808
+SEED = 14460415
 #SEED = int(start_time)
-NUM_PEERS = 100
-G_TYPE = 'barabasi_albert' # Graph type: random, geometric, scale_free (barabasi_albert)
+NUM_PEERS = 5
+G_TYPE = 'random' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 5
+G_CHAR = 0.45
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = 'random' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 50 #number of edges allowed for first forceful peer 
-STRATEGY2 ='1/D' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 50 # number of edges allowed for second forceful peers
+BUDGET1 = 5 #number of edges allowed for first forceful peer 
+STRATEGY2 ='smart' # strategy chosen by second forceful peer ((-1))
+BUDGET2 = 5 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
-SIMULATIONS = 50 # Number of repition of a match between 2 strategies
+SIMULATIONS = 1 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
 # seed the random generator
 np.random.seed(SEED)  ;rd.seed(SEED)
@@ -46,18 +47,23 @@ S1_wins_list = []
 # taking into consideration the possibility of having to redo a simulation in case of an edgeless node appears woth 1/D strategy
 i = 0
 while i < SIMULATIONS:
-	# Initialize an erdos renyi graph
+	# Initialize the graph with normal peers
 	G = gm.create_graph(G_TYPE,NUM_PEERS, G_CHAR)
-	# Add 2 forceful peers with chosen strategy
 	# Exception is thrown if there is an isolated node (ZeroDivision) or if the graph is not connected
 	# In both cases the simulation is repeated
 	try:
 		if not nx.is_connected(G): raise Exception('Graph is not connected')
-		gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
+		#gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
 	except Exception as exp:
 		# Ignore this simulation and do another one
+		print type(exp)
 		repeated_sim += 1
 		continue
+	#Add one forceul peer to the graph
+	gm.add_one_forceful(G, STRATEGY1, BUDGET1)
+
+	## Linear programming method to beat an existing peer with minimum budget
+	gm.add_smart(G,ALPHA,BUDGET1, NEUTRAL_RANGE)
 	# Calculate final opinion vector by equation, considering the presence of 
 	# 2 forceful peers in the last 2 indices of the graph
 	#R_inf = cp.R_inf(G,ALPHA)
@@ -96,4 +102,4 @@ sys.stdout.write("\a")
 #input("Press Enter to continue...")
 #print '\n'.join(map(str, R_itr))
 # Display the graph including forceful peers (NUM_PEERS+2) or not (NUM_PEERS)categorizing nodes by category and by opinion based on the neutral range
-#d.display_graph(G,NEUTRAL_RANGE,NUM_PEERS,SEED)
+d.display_graph(G,NEUTRAL_RANGE,NUM_PEERS,SEED)
