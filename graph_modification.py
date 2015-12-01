@@ -236,135 +236,52 @@ def add_smart(G,alpha, budget, neutral_range):
 		if (G.has_edge(normal,i)):
 			weight_existing.append(G[normal][i]['weight'])
 		else: weight_existing.append(0)
-	#print weight_existing
 	# normal neighbors to each node
 	sub_g = G.subgraph(xrange(normal))
 	neighbors = []
 	for i in xrange(normal):
 		neighbors.append(sub_g.neighbors(i))
-	#print neighbors
 	# Define the variables for the LP, the weight from the smart peer to all normal nodes
 	x = pulp.LpVariable.dict('weight to %d', xrange(normal), lowBound = 0,cat = pulp.LpInteger)
 	# Binary representation of edge weights, used to linearize equations
-	z0 = pulp.LpVariable.dict('z0 bin weight to 0',xrange(num_bits), lowBound = 0, upBound=1,  cat= pulp.LpBinary)
-	z1 = pulp.LpVariable.dict('z1 bin_weight to 1',xrange(num_bits), lowBound = 0, upBound=1, cat= pulp.LpBinary)
-	z2 = pulp.LpVariable.dict('z2 bin_weight to 2',xrange(num_bits), lowBound = 0, upBound=1, cat= pulp.LpBinary)
-	z3 = pulp.LpVariable.dict('z3 bin_weight to 3',xrange(num_bits), lowBound = 0, upBound=1, cat= pulp.LpBinary)
-	z4 = pulp.LpVariable.dict('z4 bin_weight to 4',xrange(num_bits), lowBound = 0, upBound=1, cat= pulp.LpBinary)
+	zvars = [pulp.LpVariable.dict('z'+str(i),xrange(num_bits),lowBound = 0, upBound=1,  cat= pulp.LpBinary) for i in xrange(normal)]
 	# Opinion 
-	variableNames = ['y0','y1','y2','y3','y4']
-	yvars = [pulp.LpVariable(name,-1,1,cat = 'Continous') for name in variableNames]
-	# y0 = pulp.LpVariable('opinion of 0',-1,1) 
-	# y1 = pulp.LpVariable('opinion of 1',-1,1) 
-	# y2 = pulp.LpVariable('opinion of 2',-1,1) 
-	# y3 = pulp.LpVariable('opinion of 3',-1,1) 
-	# y4 = pulp.LpVariable('opinion of 4',-1,1) 
+	yvars = [pulp.LpVariable('y'+str(i),-1,1,cat = 'Continous') for i in xrange(normal)]
 	# Intermediate variable for linearity reasons (to escape y*x)
-	t0 = pulp.LpVariable.dict('Intermediate 0',xrange(num_bits),lowBound = 0, cat = 'Continous')
-	t1 = pulp.LpVariable.dict('Intermediate 1',xrange(num_bits),lowBound = 0, cat = 'Continous')
-	t2 = pulp.LpVariable.dict('Intermediate 2',xrange(num_bits),lowBound = 0, cat = 'Continous')
-	t3 = pulp.LpVariable.dict('Intermediate 3',xrange(num_bits),lowBound = 0, cat = 'Continous')
-	t4 = pulp.LpVariable.dict('Intermediate 4',xrange(num_bits),lowBound = 0, cat = 'Continous')
-
+	tvars = [pulp.LpVariable.dict('t'+str(i),xrange(num_bits),lowBound = 0, cat = 'Continous') for i in xrange(normal)]
 	# Intermediate variable = 1 if following smart, 0 if neutral or following existing forceful
-	variableNames = ['p0','p1','p2','p3','p4']
-	pvars = [pulp.LpVariable(name,0,1, cat = 'Integer') for name in variableNames]
+	pvars = [pulp.LpVariable('p'+str(i),0,1, cat = 'Integer') for i in xrange(normal)]
 	# Objective function
 	win_with_min += sum ([x[i] for i in xrange(normal)])
-
 	# constraints
-	# To win with at least an equal budge to the opponent
-	#win_with_min += sum ([x[i] for i in xrange(normal)]) <= budget
-	# binary representation of edges
-	win_with_min += sum ([z0[i]*m.pow(2,i) for i in xrange(num_bits)]) == x[0]
-	win_with_min += sum ([z1[i]*m.pow(2,i) for i in xrange(num_bits)]) == x[1]
-	win_with_min += sum ([z2[i]*m.pow(2,i) for i in xrange(num_bits)]) == x[2]
-	win_with_min += sum ([z3[i]*m.pow(2,i) for i in xrange(num_bits)]) == x[3]
-	win_with_min += sum ([z4[i]*m.pow(2,i) for i in xrange(num_bits)]) == x[4]
-	# Opinion and intermediate constraints
-	win_with_min += sum ([t0[i]*m.pow(2,i) for i in xrange(num_bits)]) + yvars[0]*(weight_existing[0]+ len(neighbors[0])) == (1-alpha)*(sum([ yvars[i] for i in neighbors[0]]) - weight_existing[0] + x[0])
-	win_with_min += sum ([t1[i]*m.pow(2,i) for i in xrange(num_bits)]) + yvars[1]*(weight_existing[1]+ len(neighbors[1])) == (1-alpha)*(sum([ yvars[i] for i in neighbors[1]]) - weight_existing[1] + x[1])
-	win_with_min += sum ([t2[i]*m.pow(2,i) for i in xrange(num_bits)]) + yvars[2]*(weight_existing[2]+ len(neighbors[2])) == (1-alpha)*(sum([ yvars[i] for i in neighbors[2]]) - weight_existing[2] + x[2])
-	win_with_min += sum ([t3[i]*m.pow(2,i) for i in xrange(num_bits)]) + yvars[3]*(weight_existing[3]+ len(neighbors[3])) == (1-alpha)*(sum([ yvars[i] for i in neighbors[3]]) - weight_existing[3] + x[3])
-	win_with_min += sum ([t4[i]*m.pow(2,i) for i in xrange(num_bits)]) + yvars[4]*(weight_existing[4]+ len(neighbors[4])) == (1-alpha)*(sum([ yvars[i] for i in neighbors[4]]) - weight_existing[4] + x[4])
-
-	for j in xrange(num_bits):
-		win_with_min += t0[j] >= -z0[j]
-		win_with_min += t0[j] <= z0[j]
-		win_with_min += t0[j] >= yvars[0] - 1 +z0[j]
-		win_with_min += t0[j] <= yvars[0] + 1 -z0[j]
-
-
-	for j in xrange(num_bits):
-		win_with_min += t1[j] >= -z1[j]
-		win_with_min += t1[j] <= z1[j]
-		win_with_min += t1[j] >= yvars[1] - 1 +z1[j]
-		win_with_min += t1[j] <= yvars[1] + 1 -z1[j]
-
-	for j in xrange(num_bits):
-		win_with_min += t2[j] >= -z2[j]
-		win_with_min += t2[j] <= z2[j]
-		win_with_min += t2[j] >= yvars[2] - 1 +z2[j]
-		win_with_min += t2[j] <= yvars[2] + 1 -z2[j]
-
-	for j in xrange(num_bits):
-		win_with_min += t3[j] >= -z3[j]
-		win_with_min += t3[j] <= z3[j]
-		win_with_min += t3[j] >= yvars[3] - 1 +z3[j]
-		win_with_min += t3[j] <= yvars[3] + 1 -z3[j]
-
-	for j in xrange(num_bits):
-		win_with_min += t4[j] >= -z4[j]
-		win_with_min += t4[j] <= z4[j]
-		win_with_min += t4[j] >= yvars[4] - 1 +z4[j]
-		win_with_min += t4[j] <= yvars[4] + 1 -z4[j]
-
 	for i in xrange(normal):
+		# binary representation of edges
+		win_with_min += sum ([zvars[i][j]*m.pow(2,j) for j in xrange(num_bits)]) == x[i]
+		# Opinion and intermediate constraints
+		win_with_min += sum ([tvars[i][j]*m.pow(2,j) for j in xrange(num_bits)]) + yvars[i]*(weight_existing[i]+ len(neighbors[i])) == (1-alpha)*(sum([ yvars[j] for j in neighbors[i]]) - weight_existing[i] + x[i])
+		# tvar constraints to satisfy yi*zj
+		for j in xrange(num_bits):
+			win_with_min += tvars[i][j] >= -zvars[i][j]
+			win_with_min += tvars[i][j] <= zvars[i][j]
+			win_with_min += tvars[i][j] >= yvars[i] - 1 + zvars[i][j]
+			win_with_min += tvars[i][j] <= yvars[i] + 1 - zvars[i][j]
+		# Constraint to ensure the more than half of the normal peers follow the smart node
 		win_with_min += yvars[i] >= -1 + pvars[i]*(1+neutral_range)
-
 	win_with_min += sum ([pvars[i] for i in xrange(normal)]) >= m.ceil(normal/2)
-	#win_with_min += x[0] ==3 
+
 	win_with_min.solve()
 	for node in xrange(normal):
 		print 'weight to %d is %d' %(node,x[node].value())
-	for i in z0:
-		print z0[i].value()
-	# for i in z1:
-	# 	print z1[i].value()
-	# for i in z2:
-	# 	print z2[i].value()
-	# for i in z3:
-	# 	print z3[i].value()
-
-	# for i in z4:
-	# 	print z4[i].value()
-	print 'tij: '
-	for i in t0:
-		print t0[i].value()
-	print '--------'
-	for i in t1:
-		print t1[i].value()
-	print '--------'
-	for i in t2:
-		print t2[i].value()
-	print '--------'
-	for i in t3:
-		print t3[i].value()
-	print '--------'
-	for i in t4:
-		print t4[i].value()
-	print '--------'
 
 	print 'yvars'
 	for i in xrange(len(yvars)):
 		print 'y' + str(i) + ':' + str(yvars[i].value())
 		print '--------'
-	G.add_node(6,type = 'smart', opinion = 1)
-	# iterate the array of neighbors and add an edge
-	f_neighbors = [0,1]
-	for i in f_neighbors:
-		G.add_edge(6, i, weight = 1)
-	
+	# Using the weights solution to add edges to chosen neighbors for smart peer
+	G.add_node(normal + 1,type = 'smart', opinion = 1)
+	for node in xrange(normal):
+		if x[node].value() != 0:
+			G.add_edge(normal+1,node, weight =x[node].value()) 	
 ##
 # Adds a forceful peer that is connected to all normal peers with a given weight
 # @param G input graph
