@@ -12,24 +12,22 @@ import excp as ex
 import sys
 import display as d
 
-
-
 # Macros like variables
 start_time = time.time()
 SEED = 14460415
 #SEED = int(start_time)
-NUM_PEERS = 5
+NUM_PEERS = 13
 G_TYPE = 'random' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 0.45
+G_CHAR = 0.25
 ALPHA = 0.3 # weight given to self opinion
-STRATEGY1 = 'random' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 5 #number of edges allowed for first forceful peer 
-STRATEGY2 ='smart' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 5 # number of edges allowed for second forceful peers
+STRATEGY1 = 'smart' # strategy chosen by first forceful peer ((+1))
+BUDGET1 = 8 #number of edges allowed for first forceful peer 
+STRATEGY2 ='random' # strategy chosen by second forceful peer ((-1))
+BUDGET2 = 8 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
 SIMULATIONS = 1 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
@@ -60,7 +58,7 @@ while i < SIMULATIONS:
 		repeated_sim += 1
 		continue
 	#Add one forceul peer to the graph
-	gm.add_one_forceful(G, STRATEGY1, BUDGET1)
+	gm.add_one_forceful(G, STRATEGY2, BUDGET2)
 
 	## Linear programming method to beat an existing peer with minimum budget
 	gm.add_smart(G,ALPHA,BUDGET1, NEUTRAL_RANGE)
@@ -93,10 +91,6 @@ print 'After %d simulations: %s strategy budget = %d, %s strategy budget = %d\n\
 print 'Follwers percentage\t %.2f%% \t\t %.2f%% \t %.2f%%' %(np.mean(S1_followers)*100,np.mean(S2_followers)*100,np.mean(neutral)*100) 
 print 'Winning percentage:\t %.2f%% \t\t %.2f%% \t %.2f%%' %(wins[0],wins[1], wins[2])
 print 'Time elapsed %f' % (time.time() - start_time)
-
-print 'Final opinions:'
-for n in G.nodes():
-	print 'opinion of ' + str(n) + ' is ' + str(G.node[n]['opinion'])
 
 #print 'Repeated simulations: ', repeated_sim
 #print 'The number of simulations needed to obtain 0.5% confidence interval: ',str(cp.get_sim_num(np.mean(S1_followers),S1_followers))

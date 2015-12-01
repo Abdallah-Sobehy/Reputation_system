@@ -211,13 +211,13 @@ def add_one_forceful(G, strategy, budget):
 		raise SystemExit('Chosen strategy for forceful peer [[' + strategy1+ ']] is not applicable\nprogram will exit');
 
 	# add the forceful peers to the graph, with opinion 1 
-	G.add_node(n,type = strategy, opinion = -1)
+	G.add_node(n+1,type = strategy, opinion = -1)
 	# iterate the array of neighbors and add an edge
 	for i in f_neighbors:
 		# If an edge already exists between the 2 nodes increase the weight.
-		if G.number_of_edges(n,i) > 0: 
-			G[n][i]['weight'] +=1
-		else:G.add_edge(n, i, weight = 1)
+		if G.number_of_edges(n+1,i) > 0: 
+			G[n+1][i]['weight'] +=1
+		else:G.add_edge(n+1, i, weight = 1)
 	return;
 ##
 # Adds a smart peer to the graph with minmum possible connections to beat the alread existing peer
@@ -232,9 +232,9 @@ def add_smart(G,alpha, budget, neutral_range):
 	# Parameters 
 	# edge weight between normal nodes and existing forceful
 	weight_existing = []
-	for i in xrange(normal):
-		if (G.has_edge(normal,i)):
-			weight_existing.append(G[normal][i]['weight'])
+	for i in xrange(normal+1):
+		if (G.has_edge(normal+1,i)):
+			weight_existing.append(G[normal+1][i]['weight'])
 		else: weight_existing.append(0)
 	# normal neighbors to each node
 	sub_g = G.subgraph(xrange(normal))
@@ -270,18 +270,19 @@ def add_smart(G,alpha, budget, neutral_range):
 	win_with_min += sum ([pvars[i] for i in xrange(normal)]) >= m.ceil(normal/2)
 
 	win_with_min.solve()
-	for node in xrange(normal):
-		print 'weight to %d is %d' %(node,x[node].value())
+	# for node in xrange(normal):
+	# 	print 'weight to %d is %d' %(node,x[node].value())
 
-	print 'yvars'
-	for i in xrange(len(yvars)):
-		print 'y' + str(i) + ':' + str(yvars[i].value())
-		print '--------'
+	# print 'yvars'
+	# for i in xrange(len(yvars)):
+	# 	print 'y' + str(i) + ':' + str(yvars[i].value())
+	# 	print '--------'
 	# Using the weights solution to add edges to chosen neighbors for smart peer
-	G.add_node(normal + 1,type = 'smart', opinion = 1)
+	G.add_node(normal,type = 'smart', opinion = 1)
 	for node in xrange(normal):
 		if x[node].value() != 0:
-			G.add_edge(normal+1,node, weight =x[node].value()) 	
+			G.add_edge(normal,node, weight =x[node].value()) 	
+	print 'Smart peer budget: ' + str(sum([x[i].value() for i in xrange(normal)]))
 ##
 # Adds a forceful peer that is connected to all normal peers with a given weight
 # @param G input graph
