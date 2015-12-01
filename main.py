@@ -94,6 +94,9 @@ print 'Follwers percentage\t %.2f%% \t\t %.2f%% \t %.2f%%' %(np.mean(S1_follower
 print 'Winning percentage:\t %.2f%% \t\t %.2f%% \t %.2f%%' %(wins[0],wins[1], wins[2])
 print 'Time elapsed %f' % (time.time() - start_time)
 
+print 'Final opinions:'
+for n in G.nodes():
+	print 'opinion of ' + str(n) + ' is ' + str(G.node[n]['opinion'])
 
 #print 'Repeated simulations: ', repeated_sim
 #print 'The number of simulations needed to obtain 0.5% confidence interval: ',str(cp.get_sim_num(np.mean(S1_followers),S1_followers))

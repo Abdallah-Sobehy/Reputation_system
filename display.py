@@ -54,7 +54,7 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 	node_labels = {n:(n,round(G.node[n]['opinion'],3)) for n in G.nodes_iter()}
 	# nx.draw_networkx(G.subgraph(xrange(num_nodes)),node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
 	#nx.draw_networkx(G,node_pos,node_size = 700,node_color = color_map, edge_color = 'black', labels = node_labels, with_labels = True, font_size = 10,linewidths=0)
-	nx.draw_networkx(G,node_pos,node_size = 50,node_color = color_map, with_labels = False)
+	nx.draw_networkx(G,node_pos,node_size = 300,node_color = color_map, with_labels = True)
 	edge_labels = dict (( (i,j),G[i][j]['weight']) for (i,j) in G.edges())
 	#nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
 	plt.axis('on')
