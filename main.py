@@ -16,18 +16,18 @@ import display as d
 start_time = time.time()
 SEED = 14460415
 #SEED = int(start_time)
-NUM_PEERS = 13
+NUM_PEERS = 5
 G_TYPE = 'random' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 0.25
+G_CHAR = 0.45
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = 'smart' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 8 #number of edges allowed for first forceful peer 
+BUDGET1 = 5 #number of edges allowed for first forceful peer 
 STRATEGY2 ='random' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 8 # number of edges allowed for second forceful peers
+BUDGET2 = 5 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
 SIMULATIONS = 1 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
@@ -50,18 +50,21 @@ while i < SIMULATIONS:
 	# Exception is thrown if there is an isolated node (ZeroDivision) or if the graph is not connected
 	# In both cases the simulation is repeated
 	try:
-		if not nx.is_connected(G): raise Exception('Graph is not connected')
-		#gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
-	except Exception as exp:
+		if not nx.is_connected(G): raise nx.NetworkXException('Exception: Graph is not connected, simulation will be repeated')
+	except nx.NetworkXException as exp:
 		# Ignore this simulation and do another one
-		print type(exp)
+		print exp
 		repeated_sim += 1
 		continue
-	#Add one forceul peer to the graph
-	gm.add_one_forceful(G, STRATEGY2, BUDGET2)
-
-	## Linear programming method to beat an existing peer with minimum budget
-	gm.add_smart(G,ALPHA,BUDGET1, NEUTRAL_RANGE)
+	# If strategy 1 is not a smart peer, the 2 forceful peers can be added simultaneously
+	if STRATEGY1 != 'smart':
+		gm.add_forceful(G, STRATEGY1, BUDGET1, STRATEGY2, BUDGET2)
+	# If strategy 1 is smart then ofrceful peer with strategy 2 is added first then smart peer
+	else:
+		#Add one forceul peer to the graph
+		gm.add_one_forceful(G, STRATEGY2, BUDGET2)
+		## Linear programming method to beat an existing peer with minimum budget
+		gm.add_smart(G,ALPHA,BUDGET1, NEUTRAL_RANGE)
 	# Calculate final opinion vector by equation, considering the presence of 
 	# 2 forceful peers in the last 2 indices of the graph
 	#R_inf = cp.R_inf(G,ALPHA)
@@ -81,7 +84,6 @@ while i < SIMULATIONS:
 	#except AssertionError:
 	#	sys.exit('ConvergenceError: convergence of R_inf is not correct to 4 decimal places\nProgram will terminate')
 
-
 wins[0] = (wins[0]/SIMULATIONS)*100 
 wins[1] = (wins[1]/SIMULATIONS)*100
 wins[2] = (wins[2]/SIMULATIONS)*100
@@ -91,7 +93,6 @@ print 'After %d simulations: %s strategy budget = %d, %s strategy budget = %d\n\
 print 'Follwers percentage\t %.2f%% \t\t %.2f%% \t %.2f%%' %(np.mean(S1_followers)*100,np.mean(S2_followers)*100,np.mean(neutral)*100) 
 print 'Winning percentage:\t %.2f%% \t\t %.2f%% \t %.2f%%' %(wins[0],wins[1], wins[2])
 print 'Time elapsed %f' % (time.time() - start_time)
-
 #print 'Repeated simulations: ', repeated_sim
 #print 'The number of simulations needed to obtain 0.5% confidence interval: ',str(cp.get_sim_num(np.mean(S1_followers),S1_followers))
 #print 'The precision after ', str(SIMULATIONS), 'simulations is:', str(cp.get_precision(np.mean(S1_followers),S1_followers,SIMULATIONS))
