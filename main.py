@@ -16,18 +16,18 @@ import display as d
 start_time = time.time()
 SEED = 14460415
 #SEED = int(start_time)
-NUM_PEERS = 5
+NUM_PEERS = 10
 G_TYPE = 'random' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 0.45
+G_CHAR = 0.5
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = 'smart' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 5 #number of edges allowed for first forceful peer 
-STRATEGY2 ='random' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 5 # number of edges allowed for second forceful peers
+BUDGET1 = 10 #number of edges allowed for first forceful peer 
+STRATEGY2 ='D^2' # strategy chosen by second forceful peer ((-1))
+BUDGET2 = 10 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
 SIMULATIONS = 1 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
@@ -64,7 +64,7 @@ while i < SIMULATIONS:
 		#Add one forceul peer to the graph
 		gm.add_one_forceful(G, STRATEGY2, BUDGET2)
 		## Linear programming method to beat an existing peer with minimum budget
-		gm.add_smart(G,ALPHA,BUDGET1, NEUTRAL_RANGE)
+		BUDGET1 = gm.add_smart(G,ALPHA,BUDGET1, NEUTRAL_RANGE)
 	# Calculate final opinion vector by equation, considering the presence of 
 	# 2 forceful peers in the last 2 indices of the graph
 	#R_inf = cp.R_inf(G,ALPHA)

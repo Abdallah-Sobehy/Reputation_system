@@ -208,7 +208,7 @@ def add_one_forceful(G, strategy, budget):
 		# call strategy_1_D function to calculate neighbors for forceful peer
 		f_neighbors = strategy_1_D(G, budget)
 	else:
-		raise SystemExit('Chosen strategy for forceful peer [[' + strategy1+ ']] is not applicable\nprogram will exit');
+		raise SystemExit('Chosen strategy for forceful peer [[' + strategy+ ']] is not applicable\nprogram will exit');
 
 	# add the forceful peers to the graph, with opinion 1 
 	G.add_node(n+1,type = strategy, opinion = -1)
@@ -221,12 +221,13 @@ def add_one_forceful(G, strategy, budget):
 	return;
 ##
 # Adds a smart peer to the graph with minmum possible connections to beat the alread existing peer
-# Linear programming is used.
+# Linear programming is used: default solver is COIN MP other available solvers: COIN CMD, CPLEX, CPLEX_DLL, GLPK, GUROBI, 
 # @param G graph with normal peer and one frceful peer that is already connected
 def add_smart(G,alpha, budget, neutral_range):
 	normal = G.number_of_nodes() - 1
 	# Compute the number of binary bits needed to store the largest possible weight which depends on the budget
-	num_bits = len("{0:b}".format(budget))
+	#num_bits = (len("{0:b}".format(budget))/2)
+	num_bits = 2
 	#initialise the model
 	win_with_min = pulp.LpProblem('Beat existing peer with min budget',pulp.LpMinimize)
 	# Parameters 
@@ -265,10 +266,15 @@ def add_smart(G,alpha, budget, neutral_range):
 			win_with_min += tvars[i][j] <= zvars[i][j]
 			win_with_min += tvars[i][j] >= yvars[i] - 1 + zvars[i][j]
 			win_with_min += tvars[i][j] <= yvars[i] + 1 - zvars[i][j]
-		# Constraint to ensure the more than half of the normal peers follow the smart node
+		# Constraint to count the number of nodes following smart peer
 		win_with_min += yvars[i] >= -1 + pvars[i]*(1+neutral_range)
-	win_with_min += sum ([pvars[i] for i in xrange(normal)]) >= m.ceil(normal/2)
-
+	# Constraint to ensure that ore than half of the normal nodes follow the smart node
+	# Odd number of normal nodes
+	if normal%2 != 0:
+		win_with_min += sum ([pvars[i] for i in xrange(normal)]) >= m.ceil(normal/2)
+	# Even number of normal nodes
+	else:
+		win_with_min += sum ([pvars[i] for i in xrange(normal)]) >= (normal/2)+1
 	win_with_min.solve()
 	# for node in xrange(normal):
 	# 	print 'weight to %d is %d' %(node,x[node].value())
@@ -283,6 +289,9 @@ def add_smart(G,alpha, budget, neutral_range):
 		if x[node].value() != 0:
 			G.add_edge(normal,node, weight =x[node].value()) 	
 	print 'Smart peer budget: ' + str(sum([x[i].value() for i in xrange(normal)]))
+	print 'number of followers:', sum ([pvars[i].value() for i in xrange(normal)])
+	return sum([x[i].value() for i in xrange(normal)])
+
 ##
 # Adds a forceful peer that is connected to all normal peers with a given weight
 # @param G input graph
