@@ -11,9 +11,11 @@ import time
 import excp as ex
 import sys
 import display as d
-
+import datetime
+print datetime.datetime.today()
 # Macros like variables
 start_time = time.time()
+
 SEED = 14460415
 #SEED = int(start_time)
 NUM_PEERS = 10
@@ -22,12 +24,12 @@ G_TYPE = 'random' # Graph type: random, geometric, scale_free (barabasi_albert)
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 0.5
+G_CHAR = 0.3
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = 'smart' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 10 #number of edges allowed for first forceful peer 
+BUDGET1 = 5 #number of edges allowed for first forceful peer 
 STRATEGY2 ='D^2' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 10 # number of edges allowed for second forceful peers
+BUDGET2 = 5 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
 SIMULATIONS = 1 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
@@ -47,8 +49,7 @@ i = 0
 while i < SIMULATIONS:
 	# Initialize the graph with normal peers
 	G = gm.create_graph(G_TYPE,NUM_PEERS, G_CHAR)
-	# Exception is thrown if there is an isolated node (ZeroDivision) or if the graph is not connected
-	# In both cases the simulation is repeated
+	# Exception is thrown if the graph is not connected and simulation is repeated
 	try:
 		if not nx.is_connected(G): raise nx.NetworkXException('Exception: Graph is not connected, simulation will be repeated')
 	except nx.NetworkXException as exp:

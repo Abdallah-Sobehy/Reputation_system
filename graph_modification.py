@@ -67,6 +67,8 @@ def R_itr(G,ALPHA):
 	# Loop to call Local update function until max difference is less than the threshold
 	# @var num_loops nuber of loops needed until conversion
 	num_loops = 0
+	# File to store imulation related info
+	f = open("Opinions_last_simulation.txt", "w")
 	while (max_diff > THRESHOLD):
 		# storing opinion values in a list before update at (t-1)
 		op_list_t_1 = get_opinion(G)
@@ -75,12 +77,17 @@ def R_itr(G,ALPHA):
 		op_list_t = get_opinion(G)
 		max_diff = max_opinion_difference(op_list_t, op_list_t_1)
 		num_loops += 1
-	#print 'The maximum difference = ', max_diff
-	#print 'number of loops until conversion = ', num_loops
+	f.write('The maximum difference = '+ str(max_diff)+ '\n')
+	f.write('number of loops until conversion = '+ str(num_loops)+ '\n')
 	# R_itr contains opinion of nodes due to iterations
 	R_itr = []
+	# Write the opinions of nodes in a file
+	f.write('Opinion of nodes:\n')
 	for n in range(G.number_of_nodes()-2):
 		R_itr.append([G.node[n]['opinion']])
+		f.write('Opinion of %d is %f\n' %(n,G.node[n]['opinion']))
+	f.write('===========================\n')
+	f.close()
 	return R_itr;
 
 ##
@@ -222,6 +229,8 @@ def add_one_forceful(G, strategy, budget):
 ##
 # Adds a smart peer to the graph with minmum possible connections to beat the alread existing peer
 # Linear programming is used: default solver is COIN MP other available solvers: COIN CMD, CPLEX, CPLEX_DLL, GLPK, GUROBI, 
+# First tried with: PULP_CBC_CMD (was not enough to solve the problem on n=100 in 3 days)
+# Second trial: GLPK_CMD a prolem that took 1 min. with CBC_CMD took 6 seconds with GLPK
 # @param G graph with normal peer and one frceful peer that is already connected
 def add_smart(G,alpha, budget, neutral_range):
 	normal = G.number_of_nodes() - 1
@@ -247,11 +256,11 @@ def add_smart(G,alpha, budget, neutral_range):
 	# Binary representation of edge weights, used to linearize equations
 	zvars = [pulp.LpVariable.dict('z'+str(i),xrange(num_bits),lowBound = 0, upBound=1,  cat= pulp.LpBinary) for i in xrange(normal)]
 	# Opinion 
-	yvars = [pulp.LpVariable('y'+str(i),-1,1,cat = 'Continous') for i in xrange(normal)]
+	yvars = [pulp.LpVariable('y'+str(i),-1,1) for i in xrange(normal)]
 	# Intermediate variable for linearity reasons (to escape y*x)
-	tvars = [pulp.LpVariable.dict('t'+str(i),xrange(num_bits),lowBound = 0, cat = 'Continous') for i in xrange(normal)]
+	tvars = [pulp.LpVariable.dict('t'+str(i),xrange(num_bits),lowBound = 0) for i in xrange(normal)]
 	# Intermediate variable = 1 if following smart, 0 if neutral or following existing forceful
-	pvars = [pulp.LpVariable('p'+str(i),0,1, cat = 'Integer') for i in xrange(normal)]
+	pvars = [pulp.LpVariable('p'+str(i),0,1, cat = pulp.LpInteger) for i in xrange(normal)]
 	# Objective function
 	win_with_min += sum ([x[i] for i in xrange(normal)])
 	# constraints
@@ -275,14 +284,19 @@ def add_smart(G,alpha, budget, neutral_range):
 	# Even number of normal nodes
 	else:
 		win_with_min += sum ([pvars[i] for i in xrange(normal)]) >= (normal/2)+1
-	win_with_min.solve()
-	# for node in xrange(normal):
-	# 	print 'weight to %d is %d' %(node,x[node].value())
 
-	# print 'yvars'
-	# for i in xrange(len(yvars)):
-	# 	print 'y' + str(i) + ':' + str(yvars[i].value())
-	# 	print '--------'
+	win_with_min.solve(pulp.solvers.COINMP_DLL())
+	f = open("smart_peer_info.txt", "w")
+	f.write('Weights to nodes:\n')
+	for node in xrange(normal):
+		f.write('weight to %d is %d\n' %(node,x[node].value()))
+	f.write('===========================\n')
+
+	f.write('Opinion of nodes:\n')
+
+	for i in xrange(len(yvars)):
+		f.write('y' + str(i) + ':' + str(yvars[i].value()) + '\n')
+	f.write('===========================\n')
 	# Using the weights solution to add edges to chosen neighbors for smart peer
 	G.add_node(normal,type = 'smart', opinion = 1)
 	for node in xrange(normal):

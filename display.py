@@ -20,6 +20,7 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 	np.random.seed(SEED)
 	total_nodes = nx.number_of_nodes(G) 
 	color_map = color_graph_cat(G)
+	node_size = 300
 	# Getting positions for normal peers in the case of geometric graph, setting the positions of forceful ones 
 	if G.graph['type'] == 'geometric':
 		node_pos = nx.get_node_attributes(G,'pos')
@@ -28,22 +29,11 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 		if G.node[total_nodes-1]['opinion'] == -1:
 			node_pos[total_nodes-1] = [1.25, 1]
 	else : node_pos = None
-	# Figure 1 shows nodes according to their connection with forceful peers
-	# fig1 = plt.figure('Categories ' +G.node[total_nodes-2]['type']+ ' VS '+G.node[total_nodes-1]['type'],(8.5,8),dpi=80)
-	# fig1.text(0, 0.97, 'Light blue: connected to '+ G.node[total_nodes-2]['type']+' ,Light red: connected to '+ G.node[total_nodes-1]['type'], style='italic',fontsize=14)
-	# fig1.text(0, 0.94, 'White: connected to both,  Grey: Not connected to a forceful peer ', style='italic',fontsize=14)
-	# thismanager = plt.get_current_fig_manager()
-	# thismanager.window.move(0, 0)
-	# nx.draw(G.subgraph(xrange(num_nodes)),node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
-	
 	# Reseed to get the eact similar graph as figure 1
 	np.random.seed(SEED)
 	color_map = color_graph_op(G,neutral_range)
 	# Figure 2 shows nodes according to their opinions
 	fig2 = plt.figure('Opinion '+G.node[total_nodes-2]['type']+ ' VS '+G.node[total_nodes-1]['type'] ,(8.5,8),dpi=80)
-	fig2.text(0, 0.97, 'neutral range: '+str(neutral_range)+ '-' + str(neutral_range), style='italic',fontsize=14)
-	fig2.text(0, 0.94, 'Light blue: following '+ G.node[total_nodes-2]['type']+' ,Light red: following '+ G.node[total_nodes-1]['type'], style='italic',fontsize=14)
-	fig2.text(0, 0.91, 'Grey: neutral nodes', style='italic',fontsize=14)
 	thismanager = plt.get_current_fig_manager()
 	thismanager.window.move(700, 0)
 	node_pos=nx.spring_layout(G)
@@ -52,11 +42,17 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 	if G.node[total_nodes-1]['opinion'] == -1:
 		node_pos[total_nodes-1] = [1.25, 1]
 	node_labels = {n:(n,round(G.node[n]['opinion'],3)) for n in G.nodes_iter()}
-	# nx.draw_networkx(G.subgraph(xrange(num_nodes)),node_pos,node_size = 50,node_color = color_map, edge_color = 'black', with_labels = False)
-	#nx.draw_networkx(G,node_pos,node_size = 700,node_color = color_map, edge_color = 'black', labels = node_labels, with_labels = True, font_size = 10,linewidths=0)
-	nx.draw_networkx(G,node_pos,node_size = 300,node_color = color_map, with_labels = True)
+	# The following 5 draw_networkx_nodes functions are used to for legend drawing purpose (will be overwritten by draw_networkx function)
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100,nodelist=[total_nodes-1], node_color='crimson', label=G.node[total_nodes-1]['type']+ ' forceful peer')
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100,nodelist=[total_nodes-2], node_color='blue', label=G.node[total_nodes-2]['type']+ ' forceful peer')
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100,nodelist=[0], node_color='lightskyblue', label='following ' + G.node[total_nodes-2]['type'] )
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100,nodelist=[1], node_color='lightsalmon', label='following ' + G.node[total_nodes-1]['type'])
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100, nodelist=[2], node_color='grey', label='Neurtal' )
+	plt.legend(numpoints = 1, loc = (0, 0.88))
+	nx.draw_networkx(G,node_pos,node_size = node_size,node_color = color_map, with_labels = True,label='following '+G.node[total_nodes-1]['type'])
+
 	edge_labels = dict (( (i,j),G[i][j]['weight']) for (i,j) in G.edges())
-	#nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
+	nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
 	plt.axis('on')
 	plt.show()
 	return;
