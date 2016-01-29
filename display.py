@@ -52,8 +52,10 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 	nx.draw_networkx(G,node_pos,node_size = node_size,node_color = color_map, with_labels = True,label='following '+G.node[total_nodes-1]['type'])
 
 	edge_labels = dict (( (i,j),G[i][j]['weight']) for (i,j) in G.edges())
-	nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
+	# nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
 	plt.axis('on')
+	file_path = 'documents/analysis_smart/' + G.node[total_nodes-2]['type'] + '_' + G.node[total_nodes-1]['type'] + '_'+ str(total_nodes-2)  +'_'  + G.graph['type'] + '_' + str(G.node[total_nodes-1]['budget'])
+	plt.savefig(file_path)
 	plt.show()
 	return;
 

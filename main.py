@@ -18,18 +18,18 @@ start_time = time.time()
 
 SEED = 14460415
 #SEED = int(start_time)
-NUM_PEERS = 10
-G_TYPE = 'random' # Graph type: random, geometric, scale_free (barabasi_albert)
+NUM_PEERS = 100
+G_TYPE = 'geometric' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
 #for random graph: probability of having an edge between any 2 neighbours
 #for Geometric graph: maximum euclidean distance for a edge to exist between 2 nodes
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
-G_CHAR = 0.3
+G_CHAR = 0.2
 ALPHA = 0.3 # weight given to self opinion
 STRATEGY1 = 'smart' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 5 #number of edges allowed for first forceful peer 
-STRATEGY2 ='D^2' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 5 # number of edges allowed for second forceful peers
+BUDGET1 = 100 #number of edges allowed for first forceful peer 
+STRATEGY2 ='D' # strategy chosen by second forceful peer ((-1))
+BUDGET2 = 100 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
 SIMULATIONS = 1 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
@@ -89,7 +89,7 @@ wins[0] = (wins[0]/SIMULATIONS)*100
 wins[1] = (wins[1]/SIMULATIONS)*100
 wins[2] = (wins[2]/SIMULATIONS)*100
 
-print 'seed used: %d\tGraph type: %s' %(SEED,G_TYPE)
+print 'seed used: %d\tGraph type: %s\t number of normal nodes: %d' %(SEED,G_TYPE,NUM_PEERS)
 print 'After %d simulations: %s strategy budget = %d, %s strategy budget = %d\n\t\t\t %s strategy \t %s strategy\t neutral' %(SIMULATIONS,STRATEGY1,BUDGET1,STRATEGY2,BUDGET2, STRATEGY1,STRATEGY2)
 print 'Follwers percentage\t %.2f%% \t\t %.2f%% \t %.2f%%' %(np.mean(S1_followers)*100,np.mean(S2_followers)*100,np.mean(neutral)*100) 
 print 'Winning percentage:\t %.2f%% \t\t %.2f%% \t %.2f%%' %(wins[0],wins[1], wins[2])

@@ -218,7 +218,7 @@ def add_one_forceful(G, strategy, budget):
 		raise SystemExit('Chosen strategy for forceful peer [[' + strategy+ ']] is not applicable\nprogram will exit');
 
 	# add the forceful peers to the graph, with opinion 1 
-	G.add_node(n+1,type = strategy, opinion = -1)
+	G.add_node(n+1,type = strategy, opinion = -1, budget = budget)
 	# iterate the array of neighbors and add an edge
 	for i in f_neighbors:
 		# If an edge already exists between the 2 nodes increase the weight.
@@ -251,19 +251,22 @@ def add_smart(G,alpha, budget, neutral_range):
 	neighbors = []
 	for i in xrange(normal):
 		neighbors.append(sub_g.neighbors(i))
+	sum_weights = pulp.LpVariable('sum',lowBound = 0,cat = "Integer")
 	# Define the variables for the LP, the weight from the smart peer to all normal nodes
-	x = pulp.LpVariable.dict('weight to %d', xrange(normal), lowBound = 0,cat = pulp.LpInteger)
+	x = pulp.LpVariable.dict('weight to %d', xrange(normal), lowBound = 0,cat = "Integer")
 	# Binary representation of edge weights, used to linearize equations
-	zvars = [pulp.LpVariable.dict('z'+str(i),xrange(num_bits),lowBound = 0, upBound=1,  cat= pulp.LpBinary) for i in xrange(normal)]
+	zvars = [pulp.LpVariable.dict('z'+str(i),xrange(num_bits), cat= "Binary") for i in xrange(normal)]
 	# Opinion 
 	yvars = [pulp.LpVariable('y'+str(i),-1,1) for i in xrange(normal)]
 	# Intermediate variable for linearity reasons (to escape y*x)
 	tvars = [pulp.LpVariable.dict('t'+str(i),xrange(num_bits),lowBound = 0) for i in xrange(normal)]
 	# Intermediate variable = 1 if following smart, 0 if neutral or following existing forceful
-	pvars = [pulp.LpVariable('p'+str(i),0,1, cat = pulp.LpInteger) for i in xrange(normal)]
+	pvars = [pulp.LpVariable('p'+str(i),0,1, cat = "Binary") for i in xrange(normal)]
 	# Objective function
-	win_with_min += sum ([x[i] for i in xrange(normal)])
+	# win_with_min += sum ([x[i] for i in xrange(normal)])
+	# win_with_min += sum_weights
 	# constraints
+	win_with_min += sum ([x[i] for i in xrange(normal)])
 	for i in xrange(normal):
 		# binary representation of edges
 		win_with_min += sum ([zvars[i][j]*m.pow(2,j) for j in xrange(num_bits)]) == x[i]
@@ -285,7 +288,7 @@ def add_smart(G,alpha, budget, neutral_range):
 	else:
 		win_with_min += sum ([pvars[i] for i in xrange(normal)]) >= (normal/2)+1
 
-	win_with_min.solve(pulp.solvers.COINMP_DLL())
+	win_with_min.solve(pulp.solvers.GUROBI())
 	f = open("smart_peer_info.txt", "w")
 	f.write('Weights to nodes:\n')
 	for node in xrange(normal):
