@@ -145,6 +145,7 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 	if strategy1 == 'random':
 		# Create a list of 'budget' random numbers [0, NUM_PEERS]
 		f1_neighbors = np.random.random_integers(0, n - 1, budget1)
+		strategy1 = 'U'
 	elif strategy1 == 'D':
 		# call strategy_D function to calculate neighbors of forceful peer 1
 		f1_neighbors = strategy_D(G,budget1)
@@ -161,6 +162,7 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 	if strategy2 == 'random':
 		# Create a list of 'budget1' random numbers [0, NUM_PEERS]
 		f2_neighbors = np.random.random_integers(0, n - 1, budget2)	
+		strategy2 = 'U'
 	elif strategy2 == 'D':
 		# call strategy_D function to calculate neighbors of forceful 2
 		f2_neighbors = strategy_D(G,budget2)
@@ -176,8 +178,8 @@ def add_forceful(G, strategy1, budget1, strategy2, budget2):
 
 	# add the forceful peers to the graph, the first is with opinion 1 
 	# The second is with opinion -1
-	G.add_node(n,type = strategy1, opinion = 1)
-	G.add_node(n+1,type = strategy2, opinion = -1)
+	G.add_node(n,type = strategy1, opinion = 1, budget = budget1)
+	G.add_node(n+1,type = strategy2, opinion = -1, budget = budget2)
 	# iterate the array of neighbors and add an edge
 	for i in f1_neighbors:
 		# If an edge already exists between the 2 nodes increase the weight.
@@ -205,6 +207,7 @@ def add_one_forceful(G, strategy, budget):
 	if strategy == 'random':
 		# Create a list of 'budget' random numbers [0, NUM_PEERS]
 		f_neighbors = np.random.random_integers(0, n - 1, budget)
+		strategy = 'U'
 	elif strategy == 'D':
 		# call strategy_D function to calculate neighbors of forceful peer
 		f_neighbors = strategy_D(G,budget)
@@ -236,7 +239,9 @@ def add_smart(G,alpha, budget, neutral_range):
 	normal = G.number_of_nodes() - 1
 	# Compute the number of binary bits needed to store the largest possible weight which depends on the budget
 	#num_bits = (len("{0:b}".format(budget))/2)
-	num_bits = 2
+	if budget > 200:
+		num_bits = 3
+	else: num_bits = 2
 	#initialise the model
 	win_with_min = pulp.LpProblem('Beat existing peer with min budget',pulp.LpMinimize)
 	# Parameters 
@@ -251,7 +256,7 @@ def add_smart(G,alpha, budget, neutral_range):
 	neighbors = []
 	for i in xrange(normal):
 		neighbors.append(sub_g.neighbors(i))
-	sum_weights = pulp.LpVariable('sum',lowBound = 0,cat = "Integer")
+	# sum_weights = pulp.LpVariable('sum',lowBound = 0,cat = "Integer")
 	# Define the variables for the LP, the weight from the smart peer to all normal nodes
 	x = pulp.LpVariable.dict('weight to %d', xrange(normal), lowBound = 0,cat = "Integer")
 	# Binary representation of edge weights, used to linearize equations
@@ -288,7 +293,7 @@ def add_smart(G,alpha, budget, neutral_range):
 	else:
 		win_with_min += sum ([pvars[i] for i in xrange(normal)]) >= (normal/2)+1
 
-	win_with_min.solve(pulp.solvers.GUROBI())
+	win_with_min.solve(pulp.solvers.GUROBI(DisplayInterval=10, TimeLimit = 3600))
 	f = open("smart_peer_info.txt", "w")
 	f.write('Weights to nodes:\n')
 	for node in xrange(normal):

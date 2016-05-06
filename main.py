@@ -16,8 +16,8 @@ print datetime.datetime.today()
 # Macros like variables
 start_time = time.time()
 
-SEED = 14460415
-#SEED = int(start_time)
+# SEED = 14460415
+SEED = int(start_time)
 NUM_PEERS = 100
 G_TYPE = 'geometric' # Graph type: random, geometric, scale_free (barabasi_albert)
 # Gaph characterisitic parameter:
@@ -26,10 +26,10 @@ G_TYPE = 'geometric' # Graph type: random, geometric, scale_free (barabasi_alber
 #for barabasi albert graph: number of nodes starting the graph and number of edges a new node entering the graph will have
 G_CHAR = 0.2
 ALPHA = 0.3 # weight given to self opinion
-STRATEGY1 = 'smart' # strategy chosen by first forceful peer ((+1))
-BUDGET1 = 100 #number of edges allowed for first forceful peer 
-STRATEGY2 ='D' # strategy chosen by second forceful peer ((-1))
-BUDGET2 = 100 # number of edges allowed for second forceful peers
+STRATEGY1 = 'D' # strategy chosen by first forceful peer ((+1))
+BUDGET1 = 10 # number of edges allowed for first forceful peer 
+STRATEGY2 ='1/D' # strategy chosen by second forceful peer ((-1))
+BUDGET2 = 10 # number of edges allowed for second forceful peers
 NEUTRAL_RANGE = 0.001 # opinion between +ve and -ve values of this range are considered neutral
 SIMULATIONS = 1 # Number of repition of a match between 2 strategies
 repeated_sim = 0 # Repeated simulations in case of 1/D strategy
@@ -65,7 +65,7 @@ while i < SIMULATIONS:
 		#Add one forceul peer to the graph
 		gm.add_one_forceful(G, STRATEGY2, BUDGET2)
 		## Linear programming method to beat an existing peer with minimum budget
-		BUDGET1 = gm.add_smart(G,ALPHA,BUDGET1, NEUTRAL_RANGE)
+		BUDGET1 = gm.add_smart(G,ALPHA,BUDGET2, NEUTRAL_RANGE)
 	# Calculate final opinion vector by equation, considering the presence of 
 	# 2 forceful peers in the last 2 indices of the graph
 	#R_inf = cp.R_inf(G,ALPHA)
@@ -100,5 +100,12 @@ print 'Time elapsed %f' % (time.time() - start_time)
 sys.stdout.write("\a")
 #input("Press Enter to continue...")
 #print '\n'.join(map(str, R_itr))
+# Save Calculated opinion of nodes by simulation
+f = open("smart_peer_info.txt", "a")
+f.write('Opinions after simulation\n')
+for n in xrange(NUM_PEERS):
+	f.write('opinion of node: '+ str(n) + ' = ' + str(G.node[n]['opinion']) + '\n')
+
+f.write('===========================\n')
 # Display the graph including forceful peers (NUM_PEERS+2) or not (NUM_PEERS)categorizing nodes by category and by opinion based on the neutral range
 d.display_graph(G,NEUTRAL_RANGE,NUM_PEERS,SEED)

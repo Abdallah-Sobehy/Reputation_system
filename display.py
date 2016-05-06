@@ -20,42 +20,44 @@ def display_graph(G,neutral_range,num_nodes,SEED):
 	np.random.seed(SEED)
 	total_nodes = nx.number_of_nodes(G) 
 	color_map = color_graph_cat(G)
-	node_size = 300
+	node_size = 100
 	# Getting positions for normal peers in the case of geometric graph, setting the positions of forceful ones 
 	if G.graph['type'] == 'geometric':
 		node_pos = nx.get_node_attributes(G,'pos')
 		if G.node[total_nodes-2]['opinion'] == 1:
-			node_pos[total_nodes-2] = [-1.25,-1]
+			print 'roger'
+			node_pos[total_nodes-2] = [-0.5,0.2]
 		if G.node[total_nodes-1]['opinion'] == -1:
 			node_pos[total_nodes-1] = [1.25, 1]
-	else : node_pos = None
+	else : node_pos = nx.spring_layout(G)
 	# Reseed to get the eact similar graph as figure 1
 	np.random.seed(SEED)
 	color_map = color_graph_op(G,neutral_range)
 	# Figure 2 shows nodes according to their opinions
 	fig2 = plt.figure('Opinion '+G.node[total_nodes-2]['type']+ ' VS '+G.node[total_nodes-1]['type'] ,(8.5,8),dpi=80)
 	thismanager = plt.get_current_fig_manager()
-	thismanager.window.move(700, 0)
-	node_pos=nx.spring_layout(G)
-	if G.node[total_nodes-2]['opinion'] == 1:
+	# thismanager.window.move(700, 0)
+
+	if G.node[total_nodes-2]['opinion'] == 1 and G.graph['type'] != 'geometric':
 		node_pos[total_nodes-2] = [-1.25,-1]
-	if G.node[total_nodes-1]['opinion'] == -1:
+	if G.node[total_nodes-1]['opinion'] == -1 and G.graph['type'] != 'geometric':
 		node_pos[total_nodes-1] = [1.25, 1]
 	node_labels = {n:(n,round(G.node[n]['opinion'],3)) for n in G.nodes_iter()}
 	# The following 5 draw_networkx_nodes functions are used to for legend drawing purpose (will be overwritten by draw_networkx function)
-	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100,nodelist=[total_nodes-1], node_color='crimson', label=G.node[total_nodes-1]['type']+ ' forceful peer')
-	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100,nodelist=[total_nodes-2], node_color='blue', label=G.node[total_nodes-2]['type']+ ' forceful peer')
-	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100,nodelist=[0], node_color='lightskyblue', label='following ' + G.node[total_nodes-2]['type'] )
-	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100,nodelist=[1], node_color='lightsalmon', label='following ' + G.node[total_nodes-1]['type'])
-	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 100, nodelist=[2], node_color='grey', label='Neurtal' )
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 80,nodelist=[total_nodes-1], node_color='crimson', label=G.node[total_nodes-1]['type']+ ' forceful peer')
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 80,nodelist=[total_nodes-2], node_color='blue', label=G.node[total_nodes-2]['type']+ ' forceful peer')
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 80,nodelist=[0], node_color='lightskyblue', label='following ' + G.node[total_nodes-2]['type'] )
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 80,nodelist=[1], node_color='lightsalmon', label='following ' + G.node[total_nodes-1]['type'])
+	nx.draw_networkx_nodes(G,pos=node_pos,node_size = 80, nodelist=[2], node_color='grey', label='Neurtal' )
 	plt.legend(numpoints = 1, loc = (0, 0.88))
-	nx.draw_networkx(G,node_pos,node_size = node_size,node_color = color_map, with_labels = True,label='following '+G.node[total_nodes-1]['type'])
+	nx.draw_networkx(G,node_pos,node_size = node_size,node_color = color_map, with_labels = False,label='following '+G.node[total_nodes-1]['type'])
 
 	edge_labels = dict (( (i,j),G[i][j]['weight']) for (i,j) in G.edges())
 	# nx.draw_networkx_edge_labels(G, node_pos, edge_labels=edge_labels)
 	plt.axis('on')
-	file_path = 'documents/analysis_smart/' + G.node[total_nodes-2]['type'] + '_' + G.node[total_nodes-1]['type'] + '_'+ str(total_nodes-2)  +'_'  + G.graph['type'] + '_' + str(G.node[total_nodes-1]['budget'])
-	plt.savefig(file_path)
+	# file_path = 'documents/analysis_smart/' + G.node[total_nodes-2]['type'] + '_' + G.node[total_nodes-1]['type'] + '_'+ str(total_nodes-2)  +'_'  + G.graph['type'] + '_' + str(G.node[total_nodes-1]['budget'])
+	# file_path = 'documents/' + G.node[total_nodes-2]['type'] + '_' + G.node[total_nodes-1]['type'] + '_'+ str(total_nodes-2)  +'_'  + G.graph['type'] + '_' + str(G.node[total_nodes-1]['budget'])
+	# plt.savefig(file_path)
 	plt.show()
 	return;
 
